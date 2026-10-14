@@ -1,0 +1,14 @@
+[Unit]
+Description=Sync X11 and Wayland clipboards
+Documentation=https://github.com/noctisynth/clip-bridge
+PartOf=graphical-session.target
+After=graphical-session.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/clip-bridge
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=graphical-session.target

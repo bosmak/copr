@@ -11,11 +11,12 @@ permissions:
 
 jobs:
   discover:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     outputs:
       packages: ${{ steps.find.outputs.pkgs }}
+      all_packages: ${{ steps.find.outputs.all_pkgs }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
       - id: find
@@ -30,51 +31,69 @@ jobs:
             base="${{ github.event.before }}"
           fi
 
-          if [ -z "$base" ] || [ "$base" = "0000000000000000000000000000000000000000" ]; then
-            pkgs="$all_pkgs"
+          # First push (no parent) or force-push with no usable diff
+          # (event.before points at an unreachable SHA) → rebuild every
+          # package.
+          if [ -z "$base" ] \
+             || [ "$base" = "0000000000000000000000000000000000000000" ] \
+             || ! git cat-file -e "$base" 2>/dev/null; then
+            build_pkgs="$all_pkgs"
           else
             changed=$(git diff --name-only "$base" "${{ github.sha }}" 2>/dev/null || true)
-            echo "Changed files: $changed" >&2
+            # Belt-and-suspenders: if the diff came back empty for any
+            # reason, treat as a full rebuild.
+            if [ -z "$changed" ]; then
+              build_pkgs="$all_pkgs"
+            else
+              echo "Changed files: $changed" >&2
 
-            pkgs=""
+            build_pkgs=""
+
+            # Workflow changes affect every package's build — rebuild all.
+            if printf '%s\n' "$changed" | grep -qE '^\.github/'; then
+              build_pkgs="$all_pkgs"
+            fi
+
+            # Otherwise only rebuild packages whose own files changed.
+            # README.md / description changes only affect the COPR project
+            # metadata (rendered in update-copr), not package builds.
             for d in $(echo "$all_pkgs" | tr ',' ' '); do
               if printf '%s\n' "$changed" | grep -q "^$d/"; then
-                pkgs="$pkgs,$d"
+                build_pkgs="$build_pkgs,$d"
               fi
             done
-
-            if printf '%s\n' "$changed" | grep -qE '(^README\.md$|^description$|^\.github/)'; then
-              pkgs="$all_pkgs"
             fi
           fi
 
-          if [ -z "$pkgs" ]; then
-            pkgs="$all_pkgs"
+          build_pkgs=$(echo "$build_pkgs" | tr ',' '\n' | grep -v '^$' | sort -u)
+          if [ -z "$build_pkgs" ]; then
+            build_pkgs_json='[]'
+          else
+            build_pkgs_json=$(printf '%s\n' "$build_pkgs" | jq -R . | jq -cs .)
           fi
-
-          pkgs=$(echo "$pkgs" | tr ',' '\n' | grep -v '^$' | sort -u)
-          # Emit as a JSON array so matrix can iterate one entry per package.
-          pkgs_json=$(printf '%s\n' "$pkgs" | jq -R . | jq -cs .)
-          echo "pkgs=$pkgs_json" >> "$GITHUB_OUTPUT"
-          echo "Selected: $pkgs" >&2
+          all_pkgs_json=$(printf '%s\n' "$all_pkgs" | tr ',' '\n' | jq -R . | jq -cs .)
+          echo "pkgs=$build_pkgs_json" >> "$GITHUB_OUTPUT"
+          echo "all_pkgs=$all_pkgs_json" >> "$GITHUB_OUTPUT"
+          echo "Selected for build: $build_pkgs" >&2
+          echo "All packages: $all_pkgs" >&2
 
   publish:
     needs: [discover, update-copr]
-    if: needs.discover.outputs.packages != ''
+    if: needs.discover.outputs.packages != '[]'
     strategy:
       fail-fast: false
       matrix:
         pkg: ${{ fromJSON(needs.discover.outputs.packages) }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     container:
       image: fedora:44
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
 
       - name: Cache dnf
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: /var/cache/dnf
           key: dnf-fedora-44-v3
@@ -178,13 +197,14 @@ jobs:
           copr-cli build "$COPR_PROJECT" --nowait "$srpm"
 
   update-copr:
+    # Always run on push to main so README/description-only commits still
+    # refresh the COPR project metadata. Doesn't trigger a package rebuild.
     needs: discover
-    if: needs.discover.outputs.packages != ''
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     container:
       image: fedora:44
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
       - name: deps
@@ -222,7 +242,7 @@ jobs:
           fi
       - name: Render install instructions
         env:
-          PACKAGES: ${{ needs.discover.outputs.packages }}
+          PACKAGES: ${{ needs.discover.outputs.all_packages }}
         run: |
           {
             echo '# bosmak/copr - Personal COPR packages'
@@ -250,8 +270,7 @@ jobs:
                    "$pkg/README.md" 2>/dev/null | head -1)
             {
               echo "### $pkg"
-              echo
-              [ -n "$desc" ] && echo "$desc" && echo
+              [ -n "$desc" ] && echo "$desc"
               [ -n "$url" ]  && echo "Upstream: <$url>" && echo
             } >> /tmp/instructions.md
           done
