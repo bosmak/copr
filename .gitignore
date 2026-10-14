@@ -1,0 +1,15 @@
+# Editor / IDE / OS noise
+*.swp
+*.swo
+*~
+.DS_Store
+.idea/
+.vscode/
+
+# Local COPR build artifacts (never commit these)
+*.src.rpm
+*.rpm
+*.tar.gz
+*.tar.xz
+*.zip
+~/rpmbuild/

@@ -1,0 +1,268 @@
+name: packages
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  discover:
+    runs-on: ubuntu-latest
+    outputs:
+      packages: ${{ steps.find.outputs.pkgs }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - id: find
+        run: |
+          all_pkgs=$(find . -mindepth 2 -maxdepth 2 -name '*.spec' \
+            -printf '%h\n' | sed 's|^\./||' | sort -u | paste -sd, -)
+          echo "All packages: $all_pkgs" >&2
+
+          if [ "${{ github.event_name }}" = 'pull_request' ]; then
+            base="${{ github.event.pull_request.base.sha }}"
+          else
+            base="${{ github.event.before }}"
+          fi
+
+          if [ -z "$base" ] || [ "$base" = "0000000000000000000000000000000000000000" ]; then
+            pkgs="$all_pkgs"
+          else
+            changed=$(git diff --name-only "$base" "${{ github.sha }}" 2>/dev/null || true)
+            echo "Changed files: $changed" >&2
+
+            pkgs=""
+            for d in $(echo "$all_pkgs" | tr ',' ' '); do
+              if printf '%s\n' "$changed" | grep -q "^$d/"; then
+                pkgs="$pkgs,$d"
+              fi
+            done
+
+            if printf '%s\n' "$changed" | grep -qE '(^README\.md$|^description$|^\.github/)'; then
+              pkgs="$all_pkgs"
+            fi
+          fi
+
+          if [ -z "$pkgs" ]; then
+            pkgs="$all_pkgs"
+          fi
+
+          pkgs=$(echo "$pkgs" | tr ',' '\n' | grep -v '^$' | sort -u)
+          # Emit as a JSON array so matrix can iterate one entry per package.
+          pkgs_json=$(printf '%s\n' "$pkgs" | jq -R . | jq -cs .)
+          echo "pkgs=$pkgs_json" >> "$GITHUB_OUTPUT"
+          echo "Selected: $pkgs" >&2
+
+  publish:
+    needs: [discover, update-copr]
+    if: needs.discover.outputs.packages != ''
+    strategy:
+      fail-fast: false
+      matrix:
+        pkg: ${{ fromJSON(needs.discover.outputs.packages) }}
+    runs-on: ubuntu-latest
+    container:
+      image: fedora:44
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Cache dnf
+        uses: actions/cache@v4
+        with:
+          path: /var/cache/dnf
+          key: dnf-fedora-44-v3
+          restore-keys: dnf-fedora-44-
+
+      - name: deps
+        run: dnf install -y rpm-build rpmlint systemd-rpm-macros golang cargo rust copr-cli jq
+
+      - name: Stage upstream source and generate vendor tarball
+        env:
+          PKG_DIR: ${{ matrix.pkg }}
+        run: |
+          set -eu
+          spec=$(ls "$PKG_DIR"/*.spec)
+          version=$(grep -m1 '^Version:' "$spec" | awk '{print $2}')
+          # Source1 in the spec gives the vendor tarball's filename in SOURCES.
+          src1_filename=$(awk '/^Source1:/{$1=""; sub(/^[ \t]+/,""); print; exit}' "$spec")
+
+          # Resolve Source0 URL, substituting %{version} (rpm macros aren't
+          # expanded when reading the spec file directly). Use sed for the
+          # substitution — bash's ${var//pat/rep} interprets '{' as a glob
+          # brace expansion, which would mangle the URL.
+          src0_raw=$(awk '/^Source0:/{$1=""; sub(/^[ \t]+/,""); print; exit}' "$spec")
+          src0=$(printf '%s' "$src0_raw" | sed "s|%{version}|$version|g")
+          upstream_tar="${src0%%#*}"
+          upstream_fname="$(basename "$upstream_tar")"
+          if [[ "$src0" == *#/* ]]; then
+              upstream_fname="${src0#*#/}"
+          fi
+
+          mkdir -p /tmp/rpmbuild/SOURCES
+          echo "Fetching $upstream_tar"
+          curl -fsSL "$upstream_tar" -o "/tmp/rpmbuild/SOURCES/$upstream_fname"
+
+          work=$(mktemp -d)
+          tar -xzf "/tmp/rpmbuild/SOURCES/$upstream_fname" -C "$work" --strip-components=1
+
+          (
+              cd "$work"
+              if [ -f go.mod ]; then
+                  go mod download
+                  go mod vendor
+              elif [ -f Cargo.toml ]; then
+                  cargo vendor
+              fi
+
+              if [ -d vendor ]; then
+                  tar -cJf "/tmp/rpmbuild/SOURCES/$src1_filename" vendor/
+              fi
+          )
+
+          rm -rf "$work"
+          echo "Staged: $(ls /tmp/rpmbuild/SOURCES/)"
+
+      - name: rpmlint
+        run: rpmlint ${{ matrix.pkg }}/*.spec
+
+      - name: Stage auxiliary package files
+        env:
+          PKG_DIR: ${{ matrix.pkg }}
+        run: |
+          # Copy every file from the pkg dir into SOURCES/ except the spec.
+          # This covers Source2/3/... references (e.g. systemd unit files) without
+          # having to enumerate them in the workflow.
+          mkdir -p /tmp/rpmbuild/SOURCES
+          for f in "$PKG_DIR"/*; do
+            [ -f "$f" ] || continue
+            case "$(basename "$f")" in
+              *.spec) ;;
+              *) cp "$f" /tmp/rpmbuild/SOURCES/ ;;
+            esac
+          done
+
+      - name: rpmbuild -bs
+        run: |
+          mkdir -p /tmp/rpmbuild/{BUILD,RPMS,SOURCES,SPECS,SRPMS}
+          cp ${{ matrix.pkg }}/*.spec /tmp/rpmbuild/SPECS/
+          rpmbuild -bs \
+            --define "_topdir /tmp/rpmbuild" \
+            --define "_disable_source_fetch 0" \
+            /tmp/rpmbuild/SPECS/${{ matrix.pkg }}.spec
+
+      - name: Submit SRPM to COPR
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        env:
+          COPR_LOGIN: ${{ secrets.COPR_LOGIN }}
+          COPR_TOKEN: ${{ secrets.COPR_TOKEN }}
+          COPR_OWNER: ${{ vars.COPR_OWNER }}
+          COPR_PROJECT: ${{ vars.COPR_PROJECT }}
+        run: |
+          mkdir -p ~/.config
+          {
+            echo '[copr-cli]'
+            echo "login = ${COPR_LOGIN}"
+            echo "username = ${COPR_OWNER}"
+            echo "token = ${COPR_TOKEN}"
+            echo 'copr_url = https://copr.fedorainfracloud.org'
+          } > ~/.config/copr
+          srpm=$(ls /tmp/rpmbuild/SRPMS/*.src.rpm | head -1)
+          echo "Uploading $srpm to $COPR_OWNER/$COPR_PROJECT"
+          copr-cli build "$COPR_PROJECT" --nowait "$srpm"
+
+  update-copr:
+    needs: discover
+    if: needs.discover.outputs.packages != ''
+    runs-on: ubuntu-latest
+    container:
+      image: fedora:44
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: deps
+        run: dnf install -y copr-cli jq
+      - name: Auth with COPR
+        env:
+          COPR_LOGIN: ${{ secrets.COPR_LOGIN }}
+          COPR_TOKEN: ${{ secrets.COPR_TOKEN }}
+          COPR_OWNER: ${{ vars.COPR_OWNER }}
+          COPR_PROJECT: ${{ vars.COPR_PROJECT }}
+        run: |
+          mkdir -p ~/.config
+          {
+            echo '[copr-cli]'
+            echo "login = ${COPR_LOGIN}"
+            echo "username = ${COPR_OWNER}"
+            echo "token = ${COPR_TOKEN}"
+            echo 'copr_url = https://copr.fedorainfracloud.org'
+          } > ~/.config/copr
+      - name: Ensure COPR project exists
+        env:
+          COPR_OWNER: ${{ vars.COPR_OWNER }}
+          COPR_PROJECT: ${{ vars.COPR_PROJECT }}
+        run: |
+          if copr-cli get "$COPR_PROJECT" >/dev/null 2>&1; then
+            echo "COPR project '$COPR_OWNER/$COPR_PROJECT' already exists."
+          else
+            echo "Creating COPR project '$COPR_OWNER/$COPR_PROJECT'..."
+            copr-cli create "$COPR_PROJECT" \
+              --chroot fedora-rawhide-x86_64 \
+              --chroot fedora-44-x86_64 \
+              --chroot fedora-43-x86_64 \
+              --description "Personal COPR packages"
+            echo "Created."
+          fi
+      - name: Render install instructions
+        env:
+          PACKAGES: ${{ needs.discover.outputs.packages }}
+        run: |
+          {
+            echo '# bosmak/copr - Personal COPR packages'
+            echo
+            echo '> I do not own the upstream projects listed below.'
+            echo '> These are personal rebuilds for my own use.'
+            echo '> For the canonical source, follow each package upstream link.'
+            echo
+            echo '## Enable the repo and install'
+            echo
+            echo '```sh'
+            echo 'sudo dnf copr enable bosmak/copr'
+            echo 'sudo dnf install <package-name>'
+            echo '```'
+            echo
+            echo '## Packages'
+            echo
+          } > /tmp/instructions.md
+
+          # PACKAGES arrives as a JSON array; parse it with jq so package
+          # names that happen to contain commas (or anything weird) round-trip.
+          for pkg in $(printf '%s' "$PACKAGES" | jq -r '.[]'); do
+            url=$(grep -m1 '^URL:' "$pkg"/*.spec | awk '{print $2}')
+            desc=$(awk '/^# /{f=1;next} f && NF{print; if(/[.!?]$/)exit}' \
+                   "$pkg/README.md" 2>/dev/null | head -1)
+            {
+              echo "### $pkg"
+              echo
+              [ -n "$desc" ] && echo "$desc" && echo
+              [ -n "$url" ]  && echo "Upstream: <$url>" && echo
+            } >> /tmp/instructions.md
+          done
+
+          cat /tmp/instructions.md
+      - name: Update COPR project metadata
+        env:
+          COPR_PROJECT: ${{ vars.COPR_PROJECT }}
+        run: |
+          desc=$(cat description)
+          instr=$(cat /tmp/instructions.md)
+          copr-cli modify "$COPR_PROJECT" \
+            --description "$desc" \
+            --instructions "$instr"
