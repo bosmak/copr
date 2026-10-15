@@ -100,7 +100,10 @@ jobs:
           restore-keys: dnf-fedora-44-
 
       - name: deps
-        run: dnf install -y rpm-build rpmlint systemd-rpm-macros golang cargo rust copr-cli jq
+        # No Go/Rust toolchains — both packages ship prebuilt upstream
+        # binaries. Add golang/cargo/rust back here only if a future
+        # package needs to compile from source.
+        run: dnf install -y rpm-build rpmlint systemd-rpm-macros copr-cli jq
 
       - name: Stage upstream source and generate vendor tarball
         env:
@@ -109,43 +112,66 @@ jobs:
           set -eu
           spec=$(ls "$PKG_DIR"/*.spec)
           version=$(grep -m1 '^Version:' "$spec" | awk '{print $2}')
-          # Source1 in the spec gives the vendor tarball's filename in SOURCES.
-          src1_filename=$(awk '/^Source1:/{$1=""; sub(/^[ \t]+/,""); print; exit}' "$spec")
-
-          # Resolve Source0 URL, substituting %{version} (rpm macros aren't
-          # expanded when reading the spec file directly). Use sed for the
-          # substitution — bash's ${var//pat/rep} interprets '{' as a glob
-          # brace expansion, which would mangle the URL.
-          src0_raw=$(awk '/^Source0:/{$1=""; sub(/^[ \t]+/,""); print; exit}' "$spec")
-          src0=$(printf '%s' "$src0_raw" | sed "s|%{version}|$version|g")
-          upstream_tar="${src0%%#*}"
-          upstream_fname="$(basename "$upstream_tar")"
-          if [[ "$src0" == *#/* ]]; then
-              upstream_fname="${src0#*#/}"
-          fi
 
           mkdir -p /tmp/rpmbuild/SOURCES
-          echo "Fetching $upstream_tar"
-          curl -fsSL "$upstream_tar" -o "/tmp/rpmbuild/SOURCES/$upstream_fname"
 
-          work=$(mktemp -d)
-          tar -xzf "/tmp/rpmbuild/SOURCES/$upstream_fname" -C "$work" --strip-components=1
-
-          (
-              cd "$work"
-              if [ -f go.mod ]; then
-                  go mod download
-                  go mod vendor
-              elif [ -f Cargo.toml ]; then
-                  cargo vendor
+          # Read every SourceN line that is a URL and download it into
+          # SOURCES/. Local-file sources (no scheme) are handled by the
+          # "Stage auxiliary package files" step below.
+          #
+          # For each URL: substitute %{version} (rpm macros aren't
+          # expanded when reading the spec directly; bash ${var//pat/rep}
+          # would mangle the URL because '{' is a glob brace). Strip any
+          # '#/filename' fragment when computing the basename, but use
+          # the fragment as the on-disk filename if present (matching
+          # RPM's behavior).
+          awk '
+            /^Source[0-9]+:[[:space:]]+https?:/ {
+              sub(/^Source[0-9]+:[[:space:]]+/, "")
+              print
+            }
+          ' "$spec" | while IFS= read -r url; do
+              [ -z "$url" ] && continue
+              resolved=$(printf '%s' "$url" | sed "s|%{version}|$version|g")
+              url_no_frag="${resolved%%#*}"
+              fname="$(basename "$url_no_frag")"
+              if [[ "$resolved" == *#/* ]]; then
+                  fname="${resolved#*#/}"
               fi
+              echo "Fetching $resolved -> SOURCES/$fname"
+              curl -fsSL "$resolved" -o "/tmp/rpmbuild/SOURCES/$fname"
+          done
 
-              if [ -d vendor ]; then
-                  tar -cJf "/tmp/rpmbuild/SOURCES/$src1_filename" vendor/
-              fi
-          )
+          # If Source0 is a source tarball with a go.mod or Cargo.toml,
+          # vendor its deps into a local tarball so the build can be
+          # offline. The vendor tarball name is hardcoded to
+          # "${PKG_DIR}-vendor.tar.xz" — independent of whatever Source1
+          # happens to be used for in the spec (SHA256SUMS, sysusers
+          # conf, etc.).
+          src0_url=$(awk '/^Source0:/{$1=""; sub(/^[ \t]+/,""); print; exit}' "$spec")
+          src0_resolved=$(printf '%s' "$src0_url" | sed "s|%{version}|$version|g")
+          src0_fname="$(basename "${src0_resolved%%#*}")"
+          [[ "$src0_resolved" == *#/* ]] && src0_fname="${src0_resolved#*#/}"
 
-          rm -rf "$work"
+          if [[ "$src0_fname" == *.tar* ]] \
+             && [ -f "/tmp/rpmbuild/SOURCES/$src0_fname" ]; then
+              work=$(mktemp -d)
+              tar -xf "/tmp/rpmbuild/SOURCES/$src0_fname" -C "$work" --strip-components=1 2>/dev/null || true
+              vendor_tar="${PKG_DIR}-vendor.tar.xz"
+              (
+                  cd "$work"
+                  if [ -f go.mod ]; then
+                      go mod download
+                      go mod vendor
+                  elif [ -f Cargo.toml ]; then
+                      cargo vendor
+                  fi
+                  if [ -d vendor ]; then
+                      tar -cJf "/tmp/rpmbuild/SOURCES/$vendor_tar" vendor/
+                  fi
+              )
+              rm -rf "$work"
+          fi
           echo "Staged: $(ls /tmp/rpmbuild/SOURCES/)"
 
       - name: rpmlint
@@ -155,17 +181,15 @@ jobs:
         env:
           PKG_DIR: ${{ matrix.pkg }}
         run: |
-          # Copy every file from the pkg dir into SOURCES/ except the spec.
-          # This covers Source2/3/... references (e.g. systemd unit files) without
-          # having to enumerate them in the workflow.
+          # Recursively copy every file from the pkg dir into SOURCES/ except
+          # the spec. This covers local Sources like systemd unit files,
+          # sysusers confs, and vendored LICENSEs without having to enumerate
+          # them in the workflow. Subdirectory structure in the pkg dir is
+          # flattened: a file at 'pvpn/dist/pvpnd.service' lands at
+          # SOURCES/pvpnd.service, so the spec can reference it by basename.
           mkdir -p /tmp/rpmbuild/SOURCES
-          for f in "$PKG_DIR"/*; do
-            [ -f "$f" ] || continue
-            case "$(basename "$f")" in
-              *.spec) ;;
-              *) cp "$f" /tmp/rpmbuild/SOURCES/ ;;
-            esac
-          done
+          find "$PKG_DIR" -type f \! -name '*.spec' \
+            -exec cp -t /tmp/rpmbuild/SOURCES/ {} +
 
       - name: rpmbuild -bs
         run: |

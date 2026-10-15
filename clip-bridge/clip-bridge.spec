@@ -1,4 +1,7 @@
 %global debug_package %{nil}
+# Upstream ships a stripped binary; re-running strip on it would mutate
+# ELF section metadata and diverge from upstream's released bytes.
+%global __strip /bin/true
 
 Name:           clip-bridge
 Version:        0.1.9
@@ -6,25 +9,18 @@ Release:        1%{?dist}
 Summary:        Sync your X11 and Wayland clipboard seamlessly
 License:        MIT
 URL:            https://github.com/noctisynth/clip-bridge
-Source0:        https://github.com/noctisynth/clip-bridge/archive/refs/tags/clip-bridge-v%{version}.tar.gz#/clip-bridge-v%{version}.tar.gz
-# Vendored Rust crates. Copr's mock chroot has --resolv-conf=off and
-# can't reach crates.io, so we ship the deps and build offline.
-# Regenerate with 'cargo vendor' whenever upstream's Cargo.lock changes.
-Source1:        clip-bridge-vendor.tar.xz
-Source2:        clip-bridge.service
+# Upstream ships a prebuilt x86_64 binary in their GitHub release. Its
+# only dynamic deps are glibc / libm / libgcc — the X11 and Wayland
+# protocol code is pure Rust, so it has no .so Requires on libX11 /
+# libwayland-client. We just repackage it as-is.
+Source0:        https://github.com/noctisynth/clip-bridge/releases/download/clip-bridge-v%{version}/clip-bridge-%{version}-x86_64.tar.gz
+Source1:        clip-bridge.service
 
-BuildRequires:  cargo
-BuildRequires:  rust
-BuildRequires:  systemd-rpm-macros
-BuildRequires:  pkgconfig(wayland-client)
-BuildRequires:  pkgconfig(wayland-protocols)
-BuildRequires:  pkgconfig(xkbcommon)
-
-Requires:      wayland-client
-Requires:      libx11
-Requires:      libxkbcommon
-Recommends:    wl-clipboard
-Recommends:    xclip
+# wl-clipboard and xclip are still needed for actual clipboard I/O on
+# the Wayland and X11 sides respectively — the binary bridges selection
+# events between them.
+Recommends:     wl-clipboard
+Recommends:     xclip
 
 ExclusiveArch:  x86_64
 
@@ -34,30 +30,17 @@ it once and copying in one environment pastes in the other — copy from
 X11, paste into Wayland; copy from Wayland, paste into X11.
 
 %prep
-# Tag prefix is 'clip-bridge-v…', so the upstream tarball extracts to
-# 'clip-bridge-clip-bridge-v%{version}/'.
-%autosetup -n clip-bridge-clip-bridge-v%{version}
-tar -xf %{SOURCE1}
-
-# Tell cargo to use the vendored sources from ./vendor/ — required for
-# '--offline' builds in a network-less mock chroot.
-mkdir -p .cargo
-cat > .cargo/config.toml <<'CFG'
-[source.crates-io]
-replace-with = "vendored-sources"
-
-[source.vendored-sources]
-directory = "vendor"
-CFG
+# The release tarball ships the binary and LICENSE at the root, with no
+# enclosing directory. autosetup -c creates the build dir first so the
+# files land inside it.
+%autosetup -c -n clip-bridge-%{version}
 
 %build
-export CARGO_HOME=%{_builddir}/cargo-home
-cargo build --release --offline --locked
+# Nothing to build — we ship the upstream prebuilt binary verbatim.
 
 %install
-install -Dm755 target/release/clip-bridge %{buildroot}%{_bindir}/clip-bridge
-install -Dm644 %{SOURCE2} %{buildroot}/usr/lib/systemd/user/clip-bridge.service
-
+install -Dm755 clip-bridge %{buildroot}%{_bindir}/clip-bridge
+install -Dm644 %{SOURCE1} %{buildroot}/usr/lib/systemd/user/clip-bridge.service
 install -Dm644 LICENSE %{buildroot}%{_licensedir}/clip-bridge/LICENSE
 
 %files
