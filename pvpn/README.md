@@ -12,6 +12,28 @@ Unlike the official Proton VPN Linux app, pVPN:
 - Supports Stealth protocol (WireGuard-over-TLS) — bypasses DPI and firewalls
 - Runs as a lightweight daemon — no Electron, no Python, just Go binaries
 
+## Setup
+
+After `sudo dnf install pvpn`, two manual steps are needed before the
+client can talk to the daemon:
+
+1. **Add your user to the `pvpn` system group**, then log out and back
+   in (or run `newgrp pvpn` in the current shell):
+
+   ```sh
+   sudo usermod -aG pvpn $USER
+   ```
+
+2. **Start the daemon.** The `pvpnd` service is enabled at install and
+   will start at the next boot. To start it now without rebooting:
+
+   ```sh
+   sudo systemctl start pvpnd
+   ```
+
+Then launch the TUI with `pvpn`, or query the daemon with
+`pvpnctl status`.
+
 ## Files
 
 | File | Purpose |

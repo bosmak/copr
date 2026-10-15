@@ -16,6 +16,9 @@ URL:            https://github.com/noctisynth/clip-bridge
 Source0:        https://github.com/noctisynth/clip-bridge/releases/download/clip-bridge-v%{version}/clip-bridge-%{version}-x86_64.tar.gz
 Source1:        clip-bridge.service
 
+# Needed for the systemd_user_post / preun / postun macros.
+BuildRequires:  systemd-rpm-macros
+
 # wl-clipboard and xclip are still needed for actual clipboard I/O on
 # the Wayland and X11 sides respectively — the binary bridges selection
 # events between them.
@@ -42,6 +45,53 @@ X11, paste into Wayland; copy from Wayland, paste into X11.
 install -Dm755 clip-bridge %{buildroot}%{_bindir}/clip-bridge
 install -Dm644 %{SOURCE1} %{buildroot}/usr/lib/systemd/user/clip-bridge.service
 install -Dm644 LICENSE %{buildroot}%{_licensedir}/clip-bridge/LICENSE
+
+%post
+# Best-effort auto-enable for the installing user's session. If they
+# don't have an active session (e.g. installing inside a container or
+# over SSH without linger), this is a no-op and the post-install
+# message below tells them how to enable it manually.
+%systemd_user_post clip-bridge.service
+
+# Verify the auto-enable actually worked. The check itself needs an
+# active user session (XDG_RUNTIME_DIR), so in mock / kickstart /
+# non-interactive installs it will report "not enabled" — that's
+# expected, not a failure.
+if [ -n "${XDG_RUNTIME_DIR:-}" ] && [ -x /usr/bin/systemctl ] \
+   && /usr/bin/systemctl --user is-enabled clip-bridge.service >/dev/null 2>&1; then
+    status='enabled — will auto-start on your next login'
+else
+    status='NOT auto-enabled (no active user session; run the commands below)'
+fi
+
+cat <<EOF
+
+================================================================
+ clip-bridge %{version} — USER service, not a system service!
+================================================================
+
+  Use:  systemctl --user status clip-bridge.service
+  Not:  systemctl       status clip-bridge.service   <- won't find it
+
+  Status: $status
+
+  To enable and start it manually (if not already done):
+
+         systemctl --user enable --now clip-bridge.service
+
+  Or just run the binary once to try it (no auto-start):
+
+         clip-bridge
+
+  Verify with:   systemctl --user status clip-bridge.service
+================================================================
+EOF
+
+%preun
+%systemd_user_preun clip-bridge.service
+
+%postun
+%systemd_user_postun clip-bridge.service
 
 %files
 %license %{_licensedir}/clip-bridge/LICENSE

@@ -114,9 +114,21 @@ done
 cat <<'EOF'
 
 pVPN %{version} installed.
-  sudo usermod -aG pvpn $USER   # then newgrp or log out / in
-  pvpn                          # TUI
-  pvpnctl status                # CLI
+
+Two manual steps are needed before the client can talk to the daemon:
+
+  1. Add your user to the 'pvpn' system group, then log out
+     and back in (or run 'newgrp pvpn' in the current shell):
+
+       sudo usermod -aG pvpn $USER
+
+  2. The 'pvpnd' service is enabled and will start at boot.
+     To start it now without rebooting:
+
+       sudo systemctl start pvpnd
+
+Then launch the TUI with 'pvpn', or query the daemon with
+'pvpnctl status'.
 
 Config: /etc/pvpn/   State: /var/lib/pvpn/
 EOF
