@@ -1,0 +1,20 @@
+[Unit]
+Description=Steam tray icon (double click opens the Steam window)
+Documentation=https://github.com/ValveSoftware/steam-for-linux/issues/3519
+PartOf=graphical-session.target
+After=graphical-session.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/steam-fix-trayicon
+Restart=on-failure
+RestartSec=3
+
+# Tuning (uncomment to override):
+# Environment=STEAM_TRAY_DOUBLE_CLICK_MS=450   # max gap between the 2 clicks
+# Environment=STEAM_TRAY_MENU_DELAY_MS=280     # delay before the menu opens
+# Environment=STEAM_TRAY_WINDOW_URL=steam://open/main
+# Environment=STEAM_TRAY_ITEM_ID=steam-window   # must differ from "steam"
+
+[Install]
+WantedBy=graphical-session.target
