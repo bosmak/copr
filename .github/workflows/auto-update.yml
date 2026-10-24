@@ -29,6 +29,22 @@ jobs:
           git config user.name  'github-actions[bot]'
           git config user.email 'github-actions[bot]@users.noreply.github.com'
 
+          # Packages maintained in this repository have no separate upstream
+          # to check. Their versions are bumped manually and published by the
+          # packages workflow when the change is merged.
+          owned_packages=(
+            steam-fix-trayicon
+          )
+
+          is_owned_package() {
+            local package="$1"
+            local owned
+            for owned in "${owned_packages[@]}"; do
+              [ "$package" = "$owned" ] && return 0
+            done
+            return 1
+          }
+
           derive_upstream() {
             local spec="$1"
             local first_gh
@@ -75,6 +91,11 @@ jobs:
           while IFS= read -r spec; do
             [ -z "$spec" ] && continue
             pkg=$(basename "$(dirname "$spec")")
+
+            if is_owned_package "$pkg"; then
+              echo "::notice::$pkg is maintained in this repository; skipping upstream update check."
+              continue
+            fi
 
             echo "::group::$pkg"
 
