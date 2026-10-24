@@ -6,10 +6,10 @@
 .idea/
 .vscode/
 
-# Local COPR build artifacts (never commit these)
+# Local COPR build artifacts
 *.src.rpm
 *.rpm
 *.tar.gz
 *.tar.xz
 *.zip
-~/rpmbuild/
+build/
