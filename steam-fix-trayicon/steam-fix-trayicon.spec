@@ -2,7 +2,7 @@
 
 Name:           steam-fix-trayicon
 Version:        0.1.0
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Replacement Steam tray icon: double click opens the Steam window
 License:        MIT
 URL:            https://github.com/bosmak/copr/tree/main/steam-fix-trayicon
@@ -43,6 +43,12 @@ request: https://github.com/ValveSoftware/steam-for-linux/issues/3519
 This package installs a small StatusNotifierItem that mirrors Steam's icon,
 tooltip and menu, plus a systemd user service that keeps it running and
 re-registers it with the panel whenever the shell restarts.
+
+This package is developed against DuxShell (formerly DankMaterialShell / DMS)
+and has only been tested on niri.  DuxShell can run on other Wayland
+compositors, but that combination is untested: the single-click menu is
+opened through DuxShell's own tray IPC, and the double click relies on the
+panel sending Activate() on every left click.
 
 %prep
 # Nothing to prepare — all sources are plain files shipped in this repo.
@@ -140,5 +146,9 @@ done
 %{_userunitdir}/dms.service.d/99-steam-fix-trayicon.conf
 
 %changelog
+* Sat Oct 24 2026 Gustavo Bosmak <gustavo.bosmak@gmail.com> - 0.1.0-2
+- document that this is made for DuxShell (formerly DankMaterialShell) and
+  only tested on niri
+
 * Sat Oct 24 2026 Gustavo Bosmak <gustavo.bosmak@gmail.com> - 0.1.0-1
 - initial COPR package

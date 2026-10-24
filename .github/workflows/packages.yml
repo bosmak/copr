@@ -14,7 +14,6 @@ jobs:
     runs-on: ubuntu-24.04
     outputs:
       packages: ${{ steps.find.outputs.pkgs }}
-      all_packages: ${{ steps.find.outputs.all_pkgs }}
     steps:
       - uses: actions/checkout@v5
         with:
@@ -71,9 +70,7 @@ jobs:
           else
             build_pkgs_json=$(printf '%s\n' "$build_pkgs" | jq -R . | jq -cs .)
           fi
-          all_pkgs_json=$(printf '%s\n' "$all_pkgs" | tr ',' '\n' | jq -R . | jq -cs .)
           echo "pkgs=$build_pkgs_json" >> "$GITHUB_OUTPUT"
-          echo "all_pkgs=$all_pkgs_json" >> "$GITHUB_OUTPUT"
           echo "Selected for build: $build_pkgs" >&2
           echo "All packages: $all_pkgs" >&2
 
@@ -264,48 +261,15 @@ jobs:
               --description "Personal COPR packages"
             echo "Created."
           fi
-      - name: Render install instructions
-        env:
-          PACKAGES: ${{ needs.discover.outputs.all_packages }}
-        run: |
-          {
-            echo '# bosmak/copr - Personal COPR packages'
-            echo
-            echo '> I do not own the upstream projects listed below.'
-            echo '> These are personal rebuilds for my own use.'
-            echo '> For the canonical source, follow each package upstream link.'
-            echo
-            echo '## Enable the repo and install'
-            echo
-            echo '```sh'
-            echo 'sudo dnf copr enable bosmak/copr'
-            echo 'sudo dnf install <package-name>'
-            echo '```'
-            echo
-            echo '## Packages'
-            echo
-          } > /tmp/instructions.md
-
-          # PACKAGES arrives as a JSON array; parse it with jq so package
-          # names that happen to contain commas (or anything weird) round-trip.
-          for pkg in $(printf '%s' "$PACKAGES" | jq -r '.[]'); do
-            url=$(grep -m1 '^URL:' "$pkg"/*.spec | awk '{print $2}')
-            desc=$(awk '/^# /{f=1;next} f && NF{print; if(/[.!?]$/)exit}' \
-                   "$pkg/README.md" 2>/dev/null | head -1)
-            {
-              echo "### $pkg"
-              [ -n "$desc" ] && echo "$desc"
-              [ -n "$url" ]  && echo "Upstream: <$url>" && echo
-            } >> /tmp/instructions.md
-          done
-
-          cat /tmp/instructions.md
       - name: Update COPR project metadata
         env:
           COPR_PROJECT: ${{ vars.COPR_PROJECT }}
         run: |
           desc=$(cat description)
-          instr=$(cat /tmp/instructions.md)
+          instr=$(cat install_instructions)
+          # Print for the job log only — "$instr" holds the file *contents*,
+          # so it must not be passed to cat as a filename.
+          printf '%s\n' "$instr"
           copr-cli modify "$COPR_PROJECT" \
             --description "$desc" \
             --instructions "$instr"

@@ -1,5 +1,7 @@
 # steam-fix-trayicon
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/bosmak/copr/blob/main/steam-fix-trayicon/LICENSE)
+
 Replacement Steam tray icon for Wayland desktops: **double click opens the
 Steam window**, single click still opens Steam's own menu.
 
@@ -29,6 +31,21 @@ StatusNotifierItem that does the right thing instead.
 The menu is proxied from Steam's own dbusmenu, so the recently played games
 list is always current. The icon, tooltip and attention state are mirrored
 from Steam's real indicator.
+
+## Compatibility
+
+Built and tested against:
+
+- **DuxShell** (formerly DankMaterialShell / DMS) — the shell that hosts the
+  tray. The single-click menu is opened through DuxShell's own tray IPC
+  (`quickshell ipc call tray menu <id>`), so it needs a shell that exposes
+  that IPC.
+- **niri** — the only Wayland compositor this was exercised on.
+
+DuxShell runs on several compositors (niri, Hyprland, …) and the
+StatusNotifierItem protocol is the same everywhere, but **other combinations
+are untested**. If the single-click menu does nothing on your setup, the
+double click to open the Steam window should still work.
 
 ## Install
 
