@@ -7,6 +7,30 @@ sudo dnf install <package-name>
 
 ## Packages
 
+### artcraft-launcher
+
+[![License: MIT OR Apache-2.0](https://img.shields.io/badge/License-MIT%20OR%20Apache--2.0-blue.svg)](https://github.com/storytold/craft-launcher/blob/main/LICENSE)
+
+Install, update and launch the Craft App Suite.
+
+```sh
+sudo dnf install artcraft-launcher
+```
+
+Upstream: <https://github.com/storytold/craft-launcher>
+
+### cadcraft
+
+[![License: MIT OR Apache-2.0](https://img.shields.io/badge/License-MIT%20OR%20Apache--2.0-blue.svg)](https://github.com/storytold/cadcraft/blob/main/LICENSE)
+
+Open-source computer-aided design and drafting app: draft, dimension and plot 2D. Opens and saves DXF and DWG.
+
+```sh
+sudo dnf install cadcraft
+```
+
+Upstream: <https://github.com/storytold/cadcraft>
+
 ### clip-bridge
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/noctisynth/clip-bridge/blob/main/LICENSE)
@@ -19,6 +43,114 @@ sudo dnf install clip-bridge
 
 Upstream: <https://github.com/noctisynth/clip-bridge>
 
+### deckcraft
+
+[![License: MIT OR Apache-2.0](https://img.shields.io/badge/License-MIT%20OR%20Apache--2.0-blue.svg)](https://github.com/storytold/deckcraft/blob/main/LICENSE)
+
+Open-source presentation app that works the way PowerPoint users expect. Opens and saves .pptx.
+
+```sh
+sudo dnf install deckcraft
+```
+
+Upstream: <https://github.com/storytold/deckcraft>
+
+### designcraft
+
+[![License: MIT OR Apache-2.0](https://img.shields.io/badge/License-MIT%20OR%20Apache--2.0-blue.svg)](https://github.com/storytold/designcraft/blob/main/LICENSE)
+
+Open-source page layout and publishing app: lay out magazines, books and print documents.
+
+```sh
+sudo dnf install designcraft
+```
+
+Upstream: <https://github.com/storytold/designcraft>
+
+### effectcraft
+
+[![License: MIT OR Apache-2.0](https://img.shields.io/badge/License-MIT%20OR%20Apache--2.0-blue.svg)](https://github.com/storytold/effectcraft/blob/main/LICENSE)
+
+Open-source motion graphics and visual effects compositor.
+
+```sh
+sudo dnf install effectcraft
+```
+
+Upstream: <https://github.com/storytold/effectcraft>
+
+### figcraft
+
+[![License: MIT OR Apache-2.0](https://img.shields.io/badge/License-MIT%20OR%20Apache--2.0-blue.svg)](https://github.com/storytold/figcraft/blob/main/LICENSE)
+
+Open-source interface design and prototyping tool.
+
+```sh
+sudo dnf install figcraft
+```
+
+Upstream: <https://github.com/storytold/figcraft>
+
+### filmcraft
+
+[![License: MIT OR Apache-2.0](https://img.shields.io/badge/License-MIT%20OR%20Apache--2.0-blue.svg)](https://github.com/storytold/filmcraft/blob/main/LICENSE)
+
+Open-source video editor: edit video, color and sound.
+
+```sh
+sudo dnf install filmcraft
+```
+
+Upstream: <https://github.com/storytold/filmcraft>
+
+### gridcraft
+
+[![License: MIT OR Apache-2.0](https://img.shields.io/badge/License-MIT%20OR%20Apache--2.0-blue.svg)](https://github.com/storytold/gridcraft/blob/main/LICENSE)
+
+Open-source spreadsheet that works the way Excel users expect. Opens and saves .xlsx, CSV and TSV.
+
+```sh
+sudo dnf install gridcraft
+```
+
+Upstream: <https://github.com/storytold/gridcraft>
+
+### lightcraft
+
+[![License: MIT OR Apache-2.0](https://img.shields.io/badge/License-MIT%20OR%20Apache--2.0-blue.svg)](https://github.com/storytold/lightcraft/blob/main/LICENSE)
+
+Open-source photo library and raw developer.
+
+```sh
+sudo dnf install lightcraft
+```
+
+Upstream: <https://github.com/storytold/lightcraft>
+
+### pdfcraft
+
+[![License: MIT OR Apache-2.0](https://img.shields.io/badge/License-MIT%20OR%20Apache--2.0-blue.svg)](https://github.com/storytold/pdfcraft/blob/main/LICENSE)
+
+Open-source PDF workbench: read, comment, fill and sign.
+
+```sh
+sudo dnf install pdfcraft
+```
+
+Upstream: <https://github.com/storytold/pdfcraft>
+
+### photocraft
+
+[![License: MIT OR Apache-2.0](https://img.shields.io/badge/License-MIT%20OR%20Apache--2.0-blue.svg)](https://github.com/storytold/photocraft/blob/main/LICENSE)
+
+Open-source image editor with familiar, professional tools. Opens and saves layered PSD and PSB.
+
+```sh
+sudo dnf install photocraft
+```
+
+Upstream: <https://github.com/storytold/photocraft>
+
 ### pvpn
 
 [![License: GPL-3.0-or-later](https://img.shields.io/badge/License-GPL--3.0--or--later-blue.svg)](https://github.com/YourDoritos/pVPN/blob/main/LICENSE)
@@ -30,6 +162,31 @@ sudo dnf install pvpn
 ```
 
 Upstream: <https://github.com/YourDoritos/pVPN>
+
+### solidcraft
+
+[![License: MIT OR Apache-2.0](https://img.shields.io/badge/License-MIT%20OR%20Apache--2.0-blue.svg)](https://github.com/tangency-labs/solidcraft/blob/main/LICENSE)
+
+Open-source parametric 3D CAD application, written in pure Rust. Sketch,
+constrain and build solids on a parametric feature timeline.
+
+```sh
+sudo dnf install solidcraft
+```
+
+Upstream: <https://github.com/tangency-labs/solidcraft>
+
+### soundcraft
+
+[![License: MIT OR Apache-2.0](https://img.shields.io/badge/License-MIT%20OR%20Apache--2.0-blue.svg)](https://github.com/storytold/soundcraft/blob/main/LICENSE)
+
+Open-source digital audio workstation: record, edit and mix.
+
+```sh
+sudo dnf install soundcraft
+```
+
+Upstream: <https://github.com/storytold/soundcraft>
 
 ### steam-fix-trayicon
 
@@ -46,3 +203,27 @@ sudo dnf install steam-fix-trayicon
 ```
 
 Source: <https://github.com/bosmak/copr/tree/main/steam-fix-trayicon>
+
+### vectorcraft
+
+[![License: MIT OR Apache-2.0](https://img.shields.io/badge/License-MIT%20OR%20Apache--2.0-blue.svg)](https://github.com/storytold/vectorcraft/blob/main/LICENSE)
+
+Open-source vector illustration app. Opens and saves SVG and PDF.
+
+```sh
+sudo dnf install vectorcraft
+```
+
+Upstream: <https://github.com/storytold/vectorcraft>
+
+### wordcraft
+
+[![License: MIT OR Apache-2.0](https://img.shields.io/badge/License-MIT%20OR%20Apache--2.0-blue.svg)](https://github.com/storytold/wordcraft/blob/main/LICENSE)
+
+Open-source word processor that works the way Word users expect. Opens and saves .docx, ODT, RTF, HTML and Markdown.
+
+```sh
+sudo dnf install wordcraft
+```
+
+Upstream: <https://github.com/storytold/wordcraft>

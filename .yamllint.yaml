@@ -1,0 +1,7 @@
+# The workflows use long lines and 2 space indentation.
+extends: default
+
+rules:
+  line-length: disable
+  truthy:
+    allowed-values: ["true", "false"]

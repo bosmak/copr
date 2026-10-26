@@ -1,0 +1,6 @@
+[tools]
+prek = "latest"
+ruff = "latest"
+shellcheck = "latest"
+uv = "latest"
+yamllint = "latest"

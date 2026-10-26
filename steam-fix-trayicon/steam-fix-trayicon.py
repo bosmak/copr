@@ -61,7 +61,7 @@ FALLBACK_ITEMS = [
 
 
 def log(msg):
-    print("[steam-fix-trayicon] %s" % msg, file=sys.stderr, flush=True)
+    print(f"[steam-fix-trayicon] {msg}", file=sys.stderr, flush=True)
 
 
 def steam_running():
@@ -69,7 +69,7 @@ def steam_running():
         if not pid.isdigit():
             continue
         try:
-            with open("/proc/%s/comm" % pid) as fh:
+            with open(f"/proc/{pid}/comm") as fh:
                 name = fh.read().strip()
         except OSError:
             continue
@@ -81,7 +81,7 @@ def steam_running():
 def launch(args):
     """Run a steam CLI command without blocking the main loop."""
     cmd = [CFG["steam_bin"]] + list(args)
-    log("launching: %s" % " ".join(cmd))
+    log(f"launching: {' '.join(cmd)}")
     try:
         subprocess.Popen(
             cmd,
@@ -91,7 +91,7 @@ def launch(args):
             start_new_session=True,
         )
     except OSError as exc:
-        log("failed to launch %s: %s" % (cmd[0], exc))
+        log(f"failed to launch {cmd[0]}: {exc}")
 
 
 def dms_instances():
@@ -102,8 +102,9 @@ def dms_instances():
             stdout=subprocess.PIPE,
             stderr=subprocess.DEVNULL,
             timeout=10,
+            check=False,
         ).stdout.decode(errors="replace")
-    except Exception:
+    except (OSError, subprocess.SubprocessError):
         return []
     ids = []
     current = None
@@ -127,12 +128,14 @@ def dms_open_menu(item_id):
                 stdout=subprocess.PIPE,
                 stderr=subprocess.DEVNULL,
                 timeout=10,
+                check=False,
             )
-        except Exception:
+        except (OSError, subprocess.SubprocessError) as exc:
+            log(f"could not reach DMS instance {inst}: {exc}")
             continue
         if b"SUCCESS" in res.stdout:
             return True
-    log("could not ask DMS to open the menu for %s" % item_id)
+    log(f"could not ask DMS to open the menu for {item_id}")
     return False
 
 
@@ -158,10 +161,10 @@ class SteamTrayMenu(dbus.service.Object):
             self._remote = dbus.Interface(
                 self._bus.get_object(service, path), MENU_IFACE
             )
-            log("menu proxied to %s%s" % (service, path))
-        except Exception as exc:
+            log(f"menu proxied to {service}{path}")
+        except dbus.DBusException as exc:
             self._remote = None
-            log("could not proxy menu: %s" % exc)
+            log(f"could not proxy menu: {exc}")
 
     # --- helpers for the fallback menu ---
     def _fallback_props(self, label):
@@ -202,9 +205,11 @@ class SteamTrayMenu(dbus.service.Object):
     def GetLayout(self, parent_id, recursion_depth, property_names):
         if self._remote is not None:
             try:
-                return self._remote.GetLayout(parent_id, recursion_depth, property_names)
-            except Exception as exc:
-                log("GetLayout proxy failed: %s" % exc)
+                return self._remote.GetLayout(
+                    parent_id, recursion_depth, property_names
+                )
+            except dbus.DBusException as exc:
+                log(f"GetLayout proxy failed: {exc}")
         return dbus.UInt32(1), self._fallback_layout()
 
     @dbus.service.method(MENU_IFACE, in_signature="asas", out_signature="a{ia{sv}}")
@@ -212,8 +217,8 @@ class SteamTrayMenu(dbus.service.Object):
         if self._remote is not None:
             try:
                 return self._remote.GetGroupProperties(ids, property_names)
-            except Exception as exc:
-                log("GetGroupProperties proxy failed: %s" % exc)
+            except dbus.DBusException as exc:
+                log(f"GetGroupProperties proxy failed: {exc}")
         out = dbus.Dictionary({}, signature="ia{sv}")
         for item_id, label, _args in FALLBACK_ITEMS:
             if int(item_id) in [int(i) for i in ids]:
@@ -225,8 +230,8 @@ class SteamTrayMenu(dbus.service.Object):
         if self._remote is not None:
             try:
                 return self._remote.GetProperty(item_id, name)
-            except Exception:
-                pass
+            except dbus.DBusException as exc:
+                log(f"GetProperty proxy failed: {exc}")
         for iid, label, _args in FALLBACK_ITEMS:
             if iid == item_id:
                 if name == "label":
@@ -243,8 +248,8 @@ class SteamTrayMenu(dbus.service.Object):
             try:
                 self._remote.Event(item_id, event_id, data, timestamp)
                 return
-            except Exception as exc:
-                log("Event proxy failed: %s" % exc)
+            except dbus.DBusException as exc:
+                log(f"Event proxy failed: {exc}")
         if event_id != "clicked":
             return
         for iid, _label, args in FALLBACK_ITEMS:
@@ -257,8 +262,8 @@ class SteamTrayMenu(dbus.service.Object):
         if self._remote is not None:
             try:
                 return self._remote.AboutToShow(item_id)
-            except Exception:
-                pass
+            except dbus.DBusException as exc:
+                log(f"AboutToShow proxy failed: {exc}")
         return dbus.Boolean(False)
 
     # Some hosts (quickshell) probe the menu object for properties.
@@ -308,7 +313,9 @@ class SteamTrayItem(dbus.service.Object):
         pass
 
     @dbus.service.signal(PROPS_IFACE, signature="sa{sv}as")
-    def PropertiesChanged(self, interface_name, changed_properties, invalidated_properties):
+    def PropertiesChanged(
+        self, interface_name, changed_properties, invalidated_properties
+    ):
         pass
 
     # --- methods called by the panel host ---
@@ -326,11 +333,9 @@ class SteamTrayItem(dbus.service.Object):
             return
 
         self._last_click = now
-        log("single click (menu in %.0f ms)" % CFG["menu_delay_ms"])
+        log(f"single click (menu in {CFG['menu_delay_ms']:.0f} ms)")
         self._cancel_pending_menu()
-        self._menu_timeout = GLib.timeout_add(
-            CFG["menu_delay_ms"], self._open_menu
-        )
+        self._menu_timeout = GLib.timeout_add(CFG["menu_delay_ms"], self._open_menu)
 
     @dbus.service.method(SNI_IFACE, in_signature="ii", out_signature="")
     def SecondaryActivate(self, x, y):
@@ -386,7 +391,7 @@ class SteamTrayItem(dbus.service.Object):
         props = self._all_props()
         if prop_name not in props:
             raise dbus.exceptions.DBusException(
-                "no such property '%s'" % prop_name,
+                f"no such property '{prop_name}'",
                 name="org.freedesktop.DBus.Error.UnknownProperty",
             )
         return props[prop_name]
@@ -398,7 +403,7 @@ class SteamTrayItem(dbus.service.Object):
     @dbus.service.method(PROPS_IFACE, in_signature="ssv", out_signature="")
     def Set(self, interface_name, prop_name, value):
         raise dbus.exceptions.DBusException(
-            "property '%s' is read-only" % prop_name,
+            f"property '{prop_name}' is read-only",
             name="org.freedesktop.DBus.Error.PropertyReadOnly",
         )
 
@@ -476,10 +481,10 @@ class SteamMirror:
                 "org.kde.StatusNotifierWatcher",
                 "RegisteredStatusNotifierItems",
                 reply_handler=lambda items: self._check_items(items),
-                error_handler=lambda e: log("watcher error: %s" % e),
+                error_handler=lambda e: log(f"watcher error: {e}"),
             )
-        except Exception as exc:
-            log("could not query watcher: %s" % exc)
+        except dbus.DBusException as exc:
+            log(f"could not query watcher: {exc}")
 
     def _check_items(self, items):
         for entry in items:
@@ -497,7 +502,8 @@ class SteamMirror:
                     ),
                     error_handler=lambda e: None,
                 )
-            except Exception:
+            except dbus.DBusException as exc:
+                log(f"could not read {service}{path}: {exc}")
                 continue
 
     def _got_id(self, item_id, service, path):
@@ -507,7 +513,7 @@ class SteamMirror:
             return
         self.steam_service = service
         self.steam_path = path
-        log("mirroring Steam indicator at %s%s" % (service, path))
+        log(f"mirroring Steam indicator at {service}{path}")
         self._sync_steam_properties()
         try:
             self.bus.add_signal_receiver(
@@ -517,8 +523,8 @@ class SteamMirror:
                 path=path,
                 path_keyword="object_path",
             )
-        except Exception as exc:
-            log("could not subscribe to Steam properties: %s" % exc)
+        except dbus.DBusException as exc:
+            log(f"could not subscribe to Steam properties: {exc}")
 
     def _sync_steam_properties(self):
         """Read Steam's title/menu/icon once and mirror them."""
@@ -542,8 +548,8 @@ class SteamMirror:
                 title=str(title) if title is not None else None,
                 status=str(status) if status is not None else None,
             )
-        except Exception as exc:
-            log("could not read Steam properties: %s" % exc)
+        except dbus.DBusException as exc:
+            log(f"could not read Steam properties: {exc}")
 
     def _on_properties_changed(self, interface, changed, invalidated, object_path=None):
         if not changed:
@@ -556,7 +562,7 @@ class SteamMirror:
         if tooltip is not None:
             try:
                 description = str(tooltip[3])
-            except Exception:
+            except (IndexError, TypeError, ValueError):
                 description = None
         self.item.set_state(
             title=str(title) if title is not None else None,
@@ -574,7 +580,9 @@ def sync_with_watcher(bus, item, mirror):
     whenever we are missing from its item list.
     """
     try:
-        watcher = bus.get_object("org.kde.StatusNotifierWatcher", "/StatusNotifierWatcher")
+        watcher = bus.get_object(
+            "org.kde.StatusNotifierWatcher", "/StatusNotifierWatcher"
+        )
         watcher_props = dbus.Interface(watcher, PROPS_IFACE)
         items = [
             str(i)
@@ -585,8 +593,8 @@ def sync_with_watcher(bus, item, mirror):
         if bus.get_unique_name() + ITEM_PATH not in items:
             watcher.RegisterStatusNotifierItem(ITEM_PATH)
             log("registered with StatusNotifierWatcher")
-    except Exception as exc:
-        log("watcher unavailable (%s), will retry" % exc)
+    except dbus.DBusException as exc:
+        log(f"watcher unavailable ({exc}), will retry")
     mirror.find_steam_item()
     return True
 
@@ -602,8 +610,8 @@ def main():
     bus = dbus.SessionBus()
     try:
         dbus.service.BusName(BUS_NAME, bus)
-    except Exception as exc:
-        log("could not own bus name: %s" % exc)
+    except dbus.DBusException as exc:
+        log(f"could not own bus name: {exc}")
 
     item = SteamTrayItem(bus)
     item.set_state(status="Active" if steam_running() else "Passive")

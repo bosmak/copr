@@ -13,3 +13,10 @@
 *.tar.xz
 *.zip
 build/
+
+# Python bytecode
+__pycache__/
+*.pyc
+
+# Ruff
+.ruff_cache/

@@ -1,0 +1,46 @@
+# Git hooks, run by prek (see mise.toml).
+#
+#   mise install        install the tools
+#   mise exec -- prek run --all-files    run every hook
+#   mise exec -- prek install            install the git hook
+#
+# https://pre-commit.com
+
+repos:
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.17.2
+    hooks:
+      - id: ruff-check
+        args: [--fix]
+      - id: ruff-format
+
+  - repo: https://github.com/shellcheck-py/shellcheck-py
+    rev: v0.11.0.1-1
+    hooks:
+      - id: shellcheck
+
+  - repo: https://github.com/adrienverge/yamllint
+    rev: v1.38.0
+    hooks:
+      - id: yamllint
+        args: [-c, .yamllint.yaml]
+
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: check-added-large-files
+      - id: check-merge-conflict
+      - id: check-yaml
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+
+  - repo: local
+    hooks:
+      # rpmlint on the specs, with Fedora's ruleset (the same one
+      # "make lint" uses).
+      - id: rpmlint
+        name: rpmlint
+        entry: rpmlint
+        language: system
+        files: \.spec$
+        types: [file]

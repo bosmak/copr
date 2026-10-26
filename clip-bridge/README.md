@@ -45,4 +45,3 @@ systemctl --user status clip-bridge.service
 | `clip-bridge` | The binary — bridges X11 and Wayland clipboard event streams |
 | `clip-bridge.service` | systemd user unit; `systemctl --user enable --now clip-bridge.service` to start |
 | `LICENSE` | MIT |
-

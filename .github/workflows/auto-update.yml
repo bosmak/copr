@@ -11,6 +11,8 @@ permissions:
 jobs:
   upstream-check:
     runs-on: ubuntu-24.04
+    container:
+      image: fedora:44
     permissions:
       contents: write
       pull-requests: write
@@ -19,6 +21,9 @@ jobs:
         with:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: deps
+        run: dnf install -y git gh jq python3 curl-minimal
 
       - name: Auto-discover and update packages
         env:
@@ -140,27 +145,33 @@ jobs:
             git checkout -B main origin/main
             git checkout -b "$branch"
 
-            awk \
-              -v version="$upstream_version" \
-              -v today="$(date -u +'%a %b %d %Y')" \
-              -v bot='github-actions[bot] <github-actions[bot]@users.noreply.github.com>' '
-                {
-                  if (/^Version:/ && !done) {
-                    sub(/^Version:.*/, "Version:        " version)
-                    done = 1
-                  } else if (/^Release:/ && !r_done) {
-                    sub(/^Release:.*/, "Release:        1%{?dist}")
-                    r_done = 1
-                  } else if (/^%changelog/) {
+            if grep -q 'rpm2archive' "$spec"; then
+              python3 .github/scripts/rebundle.py refresh "$pkg" "$upstream_version"
+              extra_body="\n- The spec was regenerated from the upstream RPM."
+            else
+              extra_body=""
+              awk \
+                -v version="$upstream_version" \
+                -v today="$(date -u +'%a %b %d %Y')" \
+                -v bot='github-actions[bot] <github-actions[bot]@users.noreply.github.com>' '
+                  {
+                    if (/^Version:/ && !done) {
+                      sub(/^Version:.*/, "Version:        " version)
+                      done = 1
+                    } else if (/^Release:/ && !r_done) {
+                      sub(/^Release:.*/, "Release:        1%{?dist}")
+                      r_done = 1
+                    } else if (/^%changelog/) {
+                      print
+                      print "* " today " " bot " - " version "-1"
+                      print "- update to " version
+                      print ""
+                      next
+                    }
                     print
-                    print "* " today " " bot " - " version "-1"
-                    print "- update to " version
-                    print ""
-                    next
                   }
-                  print
-                }
-              ' "$spec" > "$spec.tmp" && mv "$spec.tmp" "$spec"
+                ' "$spec" > "$spec.tmp" && mv "$spec.tmp" "$spec"
+            fi
 
             if git diff --quiet; then
               echo "::warning::No diff after rewrite; bailing."
@@ -180,7 +191,7 @@ jobs:
               --body "Upstream [$repo](https://github.com/$repo) released [\`$tag\`](https://github.com/$repo/releases/tag/$tag).
 
           - Current spec version: \`$current\`
-          - New spec version:     \`$upstream_version\`
+          - New spec version:     \`$upstream_version\`$extra_body
 
           Triggered by the \`auto-update\` workflow. Once you merge this PR, the existing \`packages\` workflow rebuilds the package in COPR.
 
