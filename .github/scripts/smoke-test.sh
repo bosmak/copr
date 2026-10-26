@@ -75,6 +75,14 @@ for rpm_file in "$pkgs_dir"/*.rpm; do
     echo
     echo "==> $name $version"
 
+    # The debug packages only hold the debug symbols of another package.
+    case "$name" in
+        *-debuginfo | *-debugsource)
+            ok "skipped: it only holds the debug symbols"
+            continue
+            ;;
+    esac
+
     if rpm -q "$name" >/dev/null 2>&1; then
         ok "installed"
     else
@@ -141,6 +149,11 @@ for rpm_file in "$pkgs_dir"/*.rpm; do
         clip-bridge)
             # It needs a display to do its job.
             ok "skipped: it needs a display"
+            ;;
+        xwayland-satellite)
+            # It needs a Wayland session to do its job, but it can print
+            # its version and its usage without one.
+            run xwayland-satellite -version
             ;;
         steam-fix-trayicon)
             run python3 -m py_compile /usr/bin/steam-fix-trayicon

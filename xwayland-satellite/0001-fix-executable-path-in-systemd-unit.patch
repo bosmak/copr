@@ -1,0 +1,15 @@
+Upstream's unit file starts the binary from /usr/local/bin, where it is
+installed when it is built by hand. In the RPM the binary lives in
+/usr/bin, so the path has to be fixed.
+
+--- a/resources/xwayland-satellite.service
++++ b/resources/xwayland-satellite.service
+@@ -8,7 +8,7 @@
+ [Service]
+ Type=notify
+ NotifyAccess=all
+-ExecStart=/usr/local/bin/xwayland-satellite
++ExecStart=/usr/bin/xwayland-satellite
+ StandardOutput=journal
+ 
+ [Install]

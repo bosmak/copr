@@ -33,6 +33,9 @@ repos:
       - id: check-yaml
       - id: end-of-file-fixer
       - id: trailing-whitespace
+        # The patches of the packages are diffs: the trailing whitespace
+        # of their context lines is part of them.
+        exclude: \.patch$
 
   - repo: local
     hooks:

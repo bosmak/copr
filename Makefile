@@ -34,12 +34,19 @@ tool = $(if $(MISE),$(MISE) exec -- $(1),$(shell command -v $(1) 2>/dev/null))
 RUFF        ?= $(call tool,ruff)
 SHELLCHECK  ?= $(call tool,shellcheck)
 YAMLLINT    ?= $(call tool,yamllint)
-SHELL_FILES := .github/scripts/smoke-test.sh
+SHELL_FILES := .github/scripts/smoke-test.sh .github/scripts/vendor.sh
 YAML_FILES  := .github/workflows/*.yml .pre-commit-config.yaml .yamllint.yaml
 
 # The container the test target runs in. It needs podman or docker.
 TEST_IMAGE ?= fedora:44
 CONTAINER  ?= $(shell command -v podman 2>/dev/null || command -v docker 2>/dev/null)
+
+# The container that vendors the dependencies of the source packages when
+# the host has no toolchain for it.
+VENDOR_IMAGE ?= fedora:44
+
+# The container that builds the packages that are built from source.
+BUILD_IMAGE ?= fedora:44
 
 SPECS := $(wildcard */*.spec)
 PKGS   := $(sort $(notdir $(patsubst %/,%,$(dir $(SPECS)))))
@@ -60,6 +67,12 @@ $(1)-srpm:
 	 find $(TOPDIR)/$(1)/SOURCES -maxdepth 1 -type f ! -name "*$$version*" -delete
 	@find $(1) -type f ! -name '*.spec' -exec cp -t $(TOPDIR)/$(1)/SOURCES/ {} +
 	@cp $(1)/*.spec $(TOPDIR)/$(1)/SPECS/
+	@# The Go and Rust dependencies are vendored into a tarball, so the
+	@# build itself does not need the network.
+	@if grep -q -- '-vendor\.tar\.xz' $(1)/*.spec; then \
+		VENDOR_IMAGE=$(VENDOR_IMAGE) \
+		.github/scripts/vendor.sh $(1) $(TOPDIR)/$(1)/SOURCES; \
+	fi
 	@$(RPMBUILD) -bs \
 		--define "_topdir $(TOPDIR)/$(1)" \
 		--define "_disable_source_fetch 0" \
@@ -67,10 +80,18 @@ $(1)-srpm:
 
 $(1)-rpm: $(1)-srpm
 	@echo "==> $(1): binary RPM -> $(TOPDIR)/$(1)/RPMS"
-	@$(RPMBUILD) -ba \
-		--define "_topdir $(TOPDIR)/$(1)" \
-		--define "_disable_source_fetch 0" \
-		$(TOPDIR)/$(1)/SPECS/$(notdir $(SPEC_$(1)))
+	@# The packages that are built from source are built in a container:
+	@# their toolchain and build dependencies are installed there, so the
+	@# host does not need them.
+	@if grep -q -- '-vendor\.tar\.xz' $(1)/*.spec; then \
+		BUILD_IMAGE=$(BUILD_IMAGE) \
+		.github/scripts/build-in-container.sh $(1) $(TOPDIR)/$(1); \
+	else \
+		$(RPMBUILD) -ba \
+			--define "_topdir $(TOPDIR)/$(1)" \
+			--define "_disable_source_fetch 0" \
+			$(TOPDIR)/$(1)/SPECS/$(notdir $(SPEC_$(1))); \
+	fi
 
 $(1)-clean:
 	@rm -rf $(TOPDIR)/$(1)
