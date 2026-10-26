@@ -5,7 +5,7 @@
 %global __strip /bin/true
 
 Name:           solidcraft
-Version:        0.22.1
+Version:        0.23.1
 Release:        1%{?dist}
 Summary:        Open-source parametric 3D CAD application
 License:        MIT OR Apache-2.0
@@ -135,6 +135,9 @@ fi
 %{_datadir}/mime/packages/ai.storyteller.solidcraft.xml
 
 %changelog
+* Mon Oct 26 2026 github-actions[bot] <github-actions[bot]@users.noreply.github.com> - 0.23.1-1
+- update to 0.23.1
+
 * Sun Oct 25 2026 Gustavo Bosmak <gustavo.bosmak@gmail.com> - 0.22.1-1
 - update to 0.22.1
 
