@@ -51,6 +51,13 @@ jobs:
             return 1
           }
 
+          delete_remote_branch() {
+            local branch="$1"
+            if git ls-remote --exit-code --heads origin "$branch" >/dev/null 2>&1; then
+              git push origin --delete "$branch"
+            fi
+          }
+
           derive_upstream() {
             local spec="$1"
             local first_gh
@@ -144,52 +151,102 @@ jobs:
             # branch is a clean delta against the real main, not
             # against a previous in-run commit.
             git checkout -B main origin/main
-            git checkout -b "$branch"
+
+            old_prs=$(
+              gh pr list \
+                --state open \
+                --base main \
+                --limit 100 \
+                --json number,headRefName,isCrossRepository |
+                jq -r --arg prefix "auto-update/$pkg-" \
+                  '.[] | select(.isCrossRepository == false) | select(.headRefName | startswith($prefix)) | .number'
+            )
+
+            for old_pr in $old_prs; do
+              old_branch=$(gh pr view "$old_pr" --json headRefName --jq .headRefName)
+              [ "$old_branch" = "$branch" ] && continue
+
+              echo "Closing superseded pull request $old_pr ($old_branch)."
+              gh pr close "$old_pr" \
+                --comment "Superseded by the update to $upstream_version."
+              delete_remote_branch "$old_branch"
+            done
+
+            while IFS= read -r old_ref; do
+              [ -z "$old_ref" ] && continue
+              old_branch=${old_ref#origin/}
+              [ "$old_branch" = "$branch" ] && continue
+              echo "Deleting stale branch $old_branch."
+              delete_remote_branch "$old_branch"
+            done < <(
+              git for-each-ref --format='%(refname:short)' \
+                "refs/remotes/origin/auto-update/$pkg-*"
+            )
 
             if grep -q 'rpm2archive' "$spec"; then
-              python3 .github/scripts/rebundle.py refresh "$pkg" "$upstream_version"
-              extra_body="\n- The spec was regenerated from the upstream RPM."
+              extra_body="$(printf '\n- The spec was regenerated from the upstream RPM.')"
             else
               extra_body=""
-              awk \
-                -v version="$upstream_version" \
-                -v today="$(date -u +'%a %b %d %Y')" \
-                -v bot='github-actions[bot] <github-actions[bot]@users.noreply.github.com>' '
-                  {
-                    if (/^Version:/ && !done) {
-                      sub(/^Version:.*/, "Version:        " version)
-                      done = 1
-                    } else if (/^Release:/ && !r_done) {
-                      sub(/^Release:.*/, "Release:        1%{?dist}")
-                      r_done = 1
-                    } else if (/^%changelog/) {
+            fi
+
+            if git show-ref --verify --quiet "refs/remotes/origin/$branch"; then
+              echo "Branch $branch already exists; reusing it."
+            else
+              git checkout -b "$branch"
+
+              if grep -q 'rpm2archive' "$spec"; then
+                python3 .github/scripts/rebundle.py refresh "$pkg" "$upstream_version"
+              else
+                awk \
+                  -v version="$upstream_version" \
+                  -v today="$(date -u +'%a %b %d %Y')" \
+                  -v bot='github-actions[bot] <github-actions[bot]@users.noreply.github.com>' '
+                    {
+                      if (/^Version:/ && !done) {
+                        sub(/^Version:.*/, "Version:        " version)
+                        done = 1
+                      } else if (/^Release:/ && !r_done) {
+                        sub(/^Release:.*/, "Release:        1%{?dist}")
+                        r_done = 1
+                      } else if (/^%changelog/) {
+                        print
+                        print "* " today " " bot " - " version "-1"
+                        print "- update to " version
+                        print ""
+                        next
+                      }
                       print
-                      print "* " today " " bot " - " version "-1"
-                      print "- update to " version
-                      print ""
-                      next
                     }
-                    print
-                  }
-                ' "$spec" > "$spec.tmp" && mv "$spec.tmp" "$spec"
+                  ' "$spec" > "$spec.tmp" && mv "$spec.tmp" "$spec"
+              fi
+
+              if git diff --quiet; then
+                echo "::warning::No diff after rewrite; bailing."
+                git checkout -B main origin/main
+                echo "::endgroup::"
+                continue
+              fi
+
+              git add "$spec"
+              git commit -m "chore: update $pkg to $upstream_version"
+              git push -u origin "$branch"
             fi
 
-            if git diff --quiet; then
-              echo "::warning::No diff after rewrite; bailing."
-              git checkout -B main origin/main
-              echo "::endgroup::"
-              continue
-            fi
-
-            git add "$spec"
-            git commit -m "auto-update($pkg): $current -> $upstream_version"
-            git push -u origin "$branch"
-
-            gh pr create \
+            existing_pr=$(gh pr list \
+              --state open \
               --base main \
               --head "$branch" \
-              --title "auto-update($pkg): $current -> $upstream_version" \
-              --body "Upstream [$repo](https://github.com/$repo) released [\`$tag\`](https://github.com/$repo/releases/tag/$tag).
+              --json url \
+              --jq '.[0].url // empty')
+
+            if [ -n "$existing_pr" ]; then
+              echo "Pull request already exists: $existing_pr"
+            else
+              gh pr create \
+                --base main \
+                --head "$branch" \
+                --title "chore: update $pkg to $upstream_version" \
+                --body "Upstream [$repo](https://github.com/$repo) released [\`$tag\`](https://github.com/$repo/releases/tag/$tag).
 
           - Current spec version: \`$current\`
           - New spec version:     \`$upstream_version\`$extra_body
@@ -198,8 +255,8 @@ jobs:
 
           ---
 
-          🤖 Automated." \
-              || true
+          🤖 Automated."
+            fi
 
             git checkout -B main origin/main
             echo "::endgroup::"
