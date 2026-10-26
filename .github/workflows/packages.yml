@@ -76,7 +76,12 @@ jobs:
 
   publish:
     needs: [discover, update-copr]
-    if: needs.discover.outputs.packages != '[]'
+    if: >-
+      always() &&
+      needs.discover.result == 'success' &&
+      needs.discover.outputs.packages != '[]' &&
+      (needs.update-copr.result == 'success' ||
+       needs.update-copr.result == 'skipped')
     strategy:
       fail-fast: false
       matrix:
@@ -218,8 +223,9 @@ jobs:
           copr-cli build "$COPR_PROJECT" --nowait "$srpm"
 
   update-copr:
-    # Always run on push to main so README/description-only commits still
+    # Run on push to main so README/description-only commits still
     # refresh the COPR project metadata. Doesn't trigger a package rebuild.
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     needs: discover
     runs-on: ubuntu-24.04
     container:
