@@ -17,13 +17,13 @@ jobs:
       contents: write
       pull-requests: write
     steps:
+      - name: deps
+        run: dnf install -y git gh jq python3 curl-minimal
+
       - uses: actions/checkout@v5
         with:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: deps
-        run: dnf install -y git gh jq python3 curl-minimal
 
       - name: Auto-discover and update packages
         env:
