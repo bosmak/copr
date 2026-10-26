@@ -227,3 +227,17 @@ sudo dnf install wordcraft
 ```
 
 Upstream: <https://github.com/storytold/wordcraft>
+
+### xwayland-satellite
+
+[![License: MPL-2.0](https://img.shields.io/badge/License-MPL--2.0-blue.svg)](https://github.com/Supreeeme/xwayland-satellite/blob/main/LICENSE)
+
+Rootless Xwayland integration for Wayland compositors: satellite acts as
+the X window manager and hosts the Xwayland server inside the Wayland
+session.
+
+```sh
+sudo dnf install xwayland-satellite
+```
+
+Upstream: <https://github.com/Supreeeme/xwayland-satellite>

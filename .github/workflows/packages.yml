@@ -102,10 +102,12 @@ jobs:
           restore-keys: dnf-fedora-44-
 
       - name: deps
-        # No Go/Rust toolchains — both packages ship prebuilt upstream
-        # binaries. Add golang/cargo/rust back here only if a future
-        # package needs to compile from source.
-        run: dnf install -y rpm-build rpmlint systemd-rpm-macros copr-cli jq
+        # The Go and Rust packages are built from source, so their
+        # toolchains are needed here to vendor the dependencies. The
+        # binary RPMs themselves are built by COPR, not here.
+        run: |
+          dnf install -y rpm-build rpmlint systemd-rpm-macros copr-cli jq \
+              cargo cargo-rpm-macros
 
       - name: Stage upstream source and generate vendor tarball
         env:
@@ -150,30 +152,7 @@ jobs:
           # "${PKG_DIR}-vendor.tar.xz" — independent of whatever Source1
           # happens to be used for in the spec (SHA256SUMS, sysusers
           # conf, etc.).
-          src0_url=$(awk '/^Source0:/{$1=""; sub(/^[ \t]+/,""); print; exit}' "$spec")
-          src0_resolved=$(printf '%s' "$src0_url" | sed "s|%{version}|$version|g")
-          src0_fname="$(basename "${src0_resolved%%#*}")"
-          [[ "$src0_resolved" == *#/* ]] && src0_fname="${src0_resolved#*#/}"
-
-          if [[ "$src0_fname" == *.tar* ]] \
-             && [ -f "/tmp/rpmbuild/SOURCES/$src0_fname" ]; then
-              work=$(mktemp -d)
-              tar -xf "/tmp/rpmbuild/SOURCES/$src0_fname" -C "$work" --strip-components=1 2>/dev/null || true
-              vendor_tar="${PKG_DIR}-vendor.tar.xz"
-              (
-                  cd "$work"
-                  if [ -f go.mod ]; then
-                      go mod download
-                      go mod vendor
-                  elif [ -f Cargo.toml ]; then
-                      cargo vendor
-                  fi
-                  if [ -d vendor ]; then
-                      tar -cJf "/tmp/rpmbuild/SOURCES/$vendor_tar" vendor/
-                  fi
-              )
-              rm -rf "$work"
-          fi
+          .github/scripts/vendor.sh "$PKG_DIR" /tmp/rpmbuild/SOURCES
           echo "Staged: $(ls /tmp/rpmbuild/SOURCES/)"
 
       - name: rpmlint
