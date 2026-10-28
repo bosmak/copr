@@ -5,7 +5,7 @@
 %global __strip /bin/true
 
 Name:           lightcraft
-Version:        0.14.0
+Version:        0.15.0
 Release:        1%{?dist}
 Summary:        Open-source photo library and raw developer
 License:        MIT OR Apache-2.0
@@ -60,11 +60,18 @@ install -Dm644 payload/usr/share/applications/ai.storyteller.lightcraft.desktop 
 install -Dm644 payload/usr/share/doc/lightcraft/LICENSE-APACHE %{buildroot}%{_licensedir}/lightcraft/LICENSE-APACHE
 install -Dm644 payload/usr/share/doc/lightcraft/LICENSE-MIT %{buildroot}%{_licensedir}/lightcraft/LICENSE-MIT
 install -Dm644 payload/usr/share/doc/lightcraft/NOTICE %{buildroot}%{_licensedir}/lightcraft/NOTICE
+install -Dm644 payload/usr/share/doc/lightcraft/OFL-Inter.txt %{buildroot}%{_licensedir}/lightcraft/OFL-Inter.txt
 install -Dm644 payload/usr/share/doc/lightcraft/OFL-biz-ud-mincho.txt %{buildroot}%{_licensedir}/lightcraft/OFL-biz-ud-mincho.txt
 install -Dm644 payload/usr/share/doc/lightcraft/OFL-biz-ud-pgothic.txt %{buildroot}%{_licensedir}/lightcraft/OFL-biz-ud-pgothic.txt
+install -Dm644 payload/usr/share/doc/lightcraft/OFL-lxgw-wenkai-lite.txt %{buildroot}%{_licensedir}/lightcraft/OFL-lxgw-wenkai-lite.txt
+install -Dm644 payload/usr/share/doc/lightcraft/OFL-nanum-gothic.txt %{buildroot}%{_licensedir}/lightcraft/OFL-nanum-gothic.txt
 install -Dm644 payload/usr/share/doc/lightcraft/OFL-noto-sans-arabic.txt %{buildroot}%{_licensedir}/lightcraft/OFL-noto-sans-arabic.txt
 install -Dm644 payload/usr/share/doc/lightcraft/OFL-noto-sans-cjk-sc.txt %{buildroot}%{_licensedir}/lightcraft/OFL-noto-sans-cjk-sc.txt
+install -Dm644 payload/usr/share/doc/lightcraft/OFL-noto-sans-devanagari.txt %{buildroot}%{_licensedir}/lightcraft/OFL-noto-sans-devanagari.txt
 install -Dm644 payload/usr/share/doc/lightcraft/OFL-noto-sans-georgian.txt %{buildroot}%{_licensedir}/lightcraft/OFL-noto-sans-georgian.txt
+install -Dm644 payload/usr/share/doc/lightcraft/OFL-noto-sans-hebrew.txt %{buildroot}%{_licensedir}/lightcraft/OFL-noto-sans-hebrew.txt
+install -Dm644 payload/usr/share/doc/lightcraft/OFL-noto-sans-symbols-2.txt %{buildroot}%{_licensedir}/lightcraft/OFL-noto-sans-symbols-2.txt
+install -Dm644 payload/usr/share/doc/lightcraft/OFL-noto-sans-symbols.txt %{buildroot}%{_licensedir}/lightcraft/OFL-noto-sans-symbols.txt
 install -Dm644 payload/usr/share/doc/lightcraft/OFL-noto-sans-thai.txt %{buildroot}%{_licensedir}/lightcraft/OFL-noto-sans-thai.txt
 install -Dm644 payload/usr/share/doc/lightcraft/OFL-shippori-mincho.txt %{buildroot}%{_licensedir}/lightcraft/OFL-shippori-mincho.txt
 install -Dm644 payload/usr/share/doc/lightcraft/README.md %{buildroot}%{_docdir}/lightcraft/README.md
@@ -119,6 +126,9 @@ fi
 %{_datadir}/mime/packages/ai.storyteller.lightcraft.xml
 
 %changelog
+* Wed Oct 28 2026 github-actions[bot] <github-actions[bot]@users.noreply.github.com> - 0.15.0-1
+- update to 0.15.0
+
 * Sun Oct 25 2026 Gustavo Bosmak <gustavo.bosmak@gmail.com> - 0.14.0-1
 - update to 0.14.0
 
