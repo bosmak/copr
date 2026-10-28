@@ -5,7 +5,7 @@
 %global __strip /bin/true
 
 Name:           deckcraft
-Version:        0.11.1
+Version:        0.12.0
 Release:        1%{?dist}
 Summary:        Open-source presentation app that works the way PowerPoint users expect
 License:        MIT OR Apache-2.0
@@ -60,6 +60,7 @@ install -Dm755 payload/usr/bin/deckcraft-cli %{buildroot}%{_bindir}/deckcraft-cl
 install -Dm644 payload/usr/share/applications/ai.storyteller.deckcraft.desktop %{buildroot}%{_datadir}/applications/ai.storyteller.deckcraft.desktop
 install -Dm644 payload/usr/share/doc/deckcraft/LICENSE-APACHE %{buildroot}%{_licensedir}/deckcraft/LICENSE-APACHE
 install -Dm644 payload/usr/share/doc/deckcraft/LICENSE-MIT %{buildroot}%{_licensedir}/deckcraft/LICENSE-MIT
+install -Dm644 payload/usr/share/doc/deckcraft/NOTICE %{buildroot}%{_licensedir}/deckcraft/NOTICE
 install -Dm644 payload/usr/share/doc/deckcraft/OFL-biz-ud-mincho.txt %{buildroot}%{_licensedir}/deckcraft/OFL-biz-ud-mincho.txt
 install -Dm644 payload/usr/share/doc/deckcraft/OFL-biz-ud-pgothic.txt %{buildroot}%{_licensedir}/deckcraft/OFL-biz-ud-pgothic.txt
 install -Dm644 payload/usr/share/doc/deckcraft/OFL-caladea.txt %{buildroot}%{_licensedir}/deckcraft/OFL-caladea.txt
@@ -69,10 +70,18 @@ install -Dm644 payload/usr/share/doc/deckcraft/OFL-lato.txt %{buildroot}%{_licen
 install -Dm644 payload/usr/share/doc/deckcraft/OFL-liberation-mono.txt %{buildroot}%{_licensedir}/deckcraft/OFL-liberation-mono.txt
 install -Dm644 payload/usr/share/doc/deckcraft/OFL-liberation-sans.txt %{buildroot}%{_licensedir}/deckcraft/OFL-liberation-sans.txt
 install -Dm644 payload/usr/share/doc/deckcraft/OFL-liberation-serif.txt %{buildroot}%{_licensedir}/deckcraft/OFL-liberation-serif.txt
+install -Dm644 payload/usr/share/doc/deckcraft/OFL-lxgw-wenkai-lite.txt %{buildroot}%{_licensedir}/deckcraft/OFL-lxgw-wenkai-lite.txt
 install -Dm644 payload/usr/share/doc/deckcraft/OFL-merriweather.txt %{buildroot}%{_licensedir}/deckcraft/OFL-merriweather.txt
 install -Dm644 payload/usr/share/doc/deckcraft/OFL-montserrat.txt %{buildroot}%{_licensedir}/deckcraft/OFL-montserrat.txt
+install -Dm644 payload/usr/share/doc/deckcraft/OFL-nanum-gothic.txt %{buildroot}%{_licensedir}/deckcraft/OFL-nanum-gothic.txt
 install -Dm644 payload/usr/share/doc/deckcraft/OFL-noto-sans-arabic.txt %{buildroot}%{_licensedir}/deckcraft/OFL-noto-sans-arabic.txt
 install -Dm644 payload/usr/share/doc/deckcraft/OFL-noto-sans-cjk-sc.txt %{buildroot}%{_licensedir}/deckcraft/OFL-noto-sans-cjk-sc.txt
+install -Dm644 payload/usr/share/doc/deckcraft/OFL-noto-sans-devanagari.txt %{buildroot}%{_licensedir}/deckcraft/OFL-noto-sans-devanagari.txt
+install -Dm644 payload/usr/share/doc/deckcraft/OFL-noto-sans-georgian.txt %{buildroot}%{_licensedir}/deckcraft/OFL-noto-sans-georgian.txt
+install -Dm644 payload/usr/share/doc/deckcraft/OFL-noto-sans-hebrew.txt %{buildroot}%{_licensedir}/deckcraft/OFL-noto-sans-hebrew.txt
+install -Dm644 payload/usr/share/doc/deckcraft/OFL-noto-sans-symbols-2.txt %{buildroot}%{_licensedir}/deckcraft/OFL-noto-sans-symbols-2.txt
+install -Dm644 payload/usr/share/doc/deckcraft/OFL-noto-sans-symbols.txt %{buildroot}%{_licensedir}/deckcraft/OFL-noto-sans-symbols.txt
+install -Dm644 payload/usr/share/doc/deckcraft/OFL-noto-sans-thai.txt %{buildroot}%{_licensedir}/deckcraft/OFL-noto-sans-thai.txt
 install -Dm644 payload/usr/share/doc/deckcraft/OFL-nunito-sans.txt %{buildroot}%{_licensedir}/deckcraft/OFL-nunito-sans.txt
 install -Dm644 payload/usr/share/doc/deckcraft/OFL-open-sans.txt %{buildroot}%{_licensedir}/deckcraft/OFL-open-sans.txt
 install -Dm644 payload/usr/share/doc/deckcraft/OFL-playfair-display.txt %{buildroot}%{_licensedir}/deckcraft/OFL-playfair-display.txt
@@ -121,6 +130,7 @@ fi
 %files
 %license %{_licensedir}/deckcraft/LICENSE-APACHE
 %license %{_licensedir}/deckcraft/LICENSE-MIT
+%license %{_licensedir}/deckcraft/NOTICE
 %license %{_licensedir}/deckcraft/OFL-*
 %doc %{_docdir}/deckcraft/README.md
 %{_bindir}/deckcraft
@@ -132,6 +142,9 @@ fi
 %{_datadir}/mime/packages/ai.storyteller.deckcraft.xml
 
 %changelog
+* Wed Oct 28 2026 github-actions[bot] <github-actions[bot]@users.noreply.github.com> - 0.12.0-1
+- update to 0.12.0
+
 * Sun Oct 25 2026 Gustavo Bosmak <gustavo.bosmak@gmail.com> - 0.11.1-1
 - update to 0.11.1
 
