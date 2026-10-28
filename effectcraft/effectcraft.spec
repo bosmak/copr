@@ -5,7 +5,7 @@
 %global __strip /bin/true
 
 Name:           effectcraft
-Version:        0.17.0
+Version:        0.18.0
 Release:        1%{?dist}
 Summary:        Open-source motion graphics and visual effects compositor
 License:        MIT OR Apache-2.0
@@ -60,6 +60,7 @@ install -Dm755 payload/usr/bin/effectcraft-cli %{buildroot}%{_bindir}/effectcraf
 install -Dm644 payload/usr/share/applications/ai.storyteller.effectcraft.desktop %{buildroot}%{_datadir}/applications/ai.storyteller.effectcraft.desktop
 install -Dm644 payload/usr/share/doc/effectcraft/LICENSE-APACHE %{buildroot}%{_licensedir}/effectcraft/LICENSE-APACHE
 install -Dm644 payload/usr/share/doc/effectcraft/LICENSE-MIT %{buildroot}%{_licensedir}/effectcraft/LICENSE-MIT
+install -Dm644 payload/usr/share/doc/effectcraft/NOTICE %{buildroot}%{_licensedir}/effectcraft/NOTICE
 install -Dm644 payload/usr/share/doc/effectcraft/README.md %{buildroot}%{_docdir}/effectcraft/README.md
 install -Dm644 payload/usr/share/icons/hicolor/128x128/apps/ai.storyteller.effectcraft.png %{buildroot}%{_datadir}/icons/hicolor/128x128/apps/ai.storyteller.effectcraft.png
 install -Dm644 payload/usr/share/icons/hicolor/128x128/apps/ai.storyteller.effectcraft.png.attribution %{buildroot}%{_datadir}/icons/hicolor/128x128/apps/ai.storyteller.effectcraft.png.attribution
@@ -109,6 +110,7 @@ fi
 %files
 %license %{_licensedir}/effectcraft/LICENSE-APACHE
 %license %{_licensedir}/effectcraft/LICENSE-MIT
+%license %{_licensedir}/effectcraft/NOTICE
 %doc %{_docdir}/effectcraft/README.md
 %{_bindir}/effectcraft
 %{_bindir}/effectcraft-cli
@@ -121,6 +123,9 @@ fi
 %{_datadir}/mime/packages/ai.storyteller.effectcraft.xml
 
 %changelog
+* Wed Oct 28 2026 github-actions[bot] <github-actions[bot]@users.noreply.github.com> - 0.18.0-1
+- update to 0.18.0
+
 * Sun Oct 25 2026 Gustavo Bosmak <gustavo.bosmak@gmail.com> - 0.17.0-1
 - update to 0.17.0
 
