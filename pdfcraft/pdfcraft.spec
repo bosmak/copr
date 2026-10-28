@@ -5,7 +5,7 @@
 %global __strip /bin/true
 
 Name:           pdfcraft
-Version:        0.14.0
+Version:        0.15.0
 Release:        1%{?dist}
 Summary:        Open-source PDF workbench: read, comment, fill and sign
 License:        MIT OR Apache-2.0
@@ -62,8 +62,15 @@ install -Dm644 payload/usr/share/doc/pdfcraft/LICENSE-MIT %{buildroot}%{_license
 install -Dm644 payload/usr/share/doc/pdfcraft/NOTICE %{buildroot}%{_licensedir}/pdfcraft/NOTICE
 install -Dm644 payload/usr/share/doc/pdfcraft/OFL-biz-ud-mincho.txt %{buildroot}%{_licensedir}/pdfcraft/OFL-biz-ud-mincho.txt
 install -Dm644 payload/usr/share/doc/pdfcraft/OFL-biz-ud-pgothic.txt %{buildroot}%{_licensedir}/pdfcraft/OFL-biz-ud-pgothic.txt
+install -Dm644 payload/usr/share/doc/pdfcraft/OFL-lxgw-wenkai-lite.txt %{buildroot}%{_licensedir}/pdfcraft/OFL-lxgw-wenkai-lite.txt
+install -Dm644 payload/usr/share/doc/pdfcraft/OFL-nanum-gothic.txt %{buildroot}%{_licensedir}/pdfcraft/OFL-nanum-gothic.txt
 install -Dm644 payload/usr/share/doc/pdfcraft/OFL-noto-sans-arabic.txt %{buildroot}%{_licensedir}/pdfcraft/OFL-noto-sans-arabic.txt
 install -Dm644 payload/usr/share/doc/pdfcraft/OFL-noto-sans-cjk-sc.txt %{buildroot}%{_licensedir}/pdfcraft/OFL-noto-sans-cjk-sc.txt
+install -Dm644 payload/usr/share/doc/pdfcraft/OFL-noto-sans-devanagari.txt %{buildroot}%{_licensedir}/pdfcraft/OFL-noto-sans-devanagari.txt
+install -Dm644 payload/usr/share/doc/pdfcraft/OFL-noto-sans-georgian.txt %{buildroot}%{_licensedir}/pdfcraft/OFL-noto-sans-georgian.txt
+install -Dm644 payload/usr/share/doc/pdfcraft/OFL-noto-sans-hebrew.txt %{buildroot}%{_licensedir}/pdfcraft/OFL-noto-sans-hebrew.txt
+install -Dm644 payload/usr/share/doc/pdfcraft/OFL-noto-sans-symbols-2.txt %{buildroot}%{_licensedir}/pdfcraft/OFL-noto-sans-symbols-2.txt
+install -Dm644 payload/usr/share/doc/pdfcraft/OFL-noto-sans-symbols.txt %{buildroot}%{_licensedir}/pdfcraft/OFL-noto-sans-symbols.txt
 install -Dm644 payload/usr/share/doc/pdfcraft/OFL-noto-sans-thai.txt %{buildroot}%{_licensedir}/pdfcraft/OFL-noto-sans-thai.txt
 install -Dm644 payload/usr/share/doc/pdfcraft/OFL-shippori-mincho.txt %{buildroot}%{_licensedir}/pdfcraft/OFL-shippori-mincho.txt
 install -Dm644 payload/usr/share/doc/pdfcraft/README.md %{buildroot}%{_docdir}/pdfcraft/README.md
@@ -79,10 +86,10 @@ install -Dm644 payload/usr/share/icons/hicolor/scalable/apps/ai.storyteller.pdfc
 install -Dm644 payload/usr/share/metainfo/ai.storyteller.pdfcraft.metainfo.xml %{buildroot}%{_datadir}/metainfo/ai.storyteller.pdfcraft.metainfo.xml
 install -Dm644 payload/usr/share/mime/packages/ai.storyteller.pdfcraft.xml %{buildroot}%{_datadir}/mime/packages/ai.storyteller.pdfcraft.xml
 install -Dm644 payload/usr/share/pdfcraft/models/ATTRIBUTION.txt %{buildroot}%{_datadir}/pdfcraft/models/ATTRIBUTION.txt
-install -Dm644 payload/usr/share/pdfcraft/models/text-detection.rten %{buildroot}%{_datadir}/pdfcraft/models/text-detection.rten
-install -Dm644 payload/usr/share/pdfcraft/models/text-detection.rten.LICENCE.txt %{buildroot}%{_datadir}/pdfcraft/models/text-detection.rten.LICENCE.txt
-install -Dm644 payload/usr/share/pdfcraft/models/text-recognition.rten %{buildroot}%{_datadir}/pdfcraft/models/text-recognition.rten
-install -Dm644 payload/usr/share/pdfcraft/models/text-recognition.rten.LICENCE.txt %{buildroot}%{_datadir}/pdfcraft/models/text-recognition.rten.LICENCE.txt
+install -Dm644 payload/usr/share/pdfcraft/models/text-detection.onnx %{buildroot}%{_datadir}/pdfcraft/models/text-detection.onnx
+install -Dm644 payload/usr/share/pdfcraft/models/text-detection.onnx.LICENCE.txt %{buildroot}%{_datadir}/pdfcraft/models/text-detection.onnx.LICENCE.txt
+install -Dm644 payload/usr/share/pdfcraft/models/text-recognition.onnx %{buildroot}%{_datadir}/pdfcraft/models/text-recognition.onnx
+install -Dm644 payload/usr/share/pdfcraft/models/text-recognition.onnx.LICENCE.txt %{buildroot}%{_datadir}/pdfcraft/models/text-recognition.onnx.LICENCE.txt
 
 %post
 # Refresh the desktop entry, the MIME database and the icon cache. Every
@@ -122,12 +129,15 @@ fi
 %{_datadir}/metainfo/ai.storyteller.pdfcraft.metainfo.xml
 %{_datadir}/mime/packages/ai.storyteller.pdfcraft.xml
 %{_datadir}/pdfcraft/models/ATTRIBUTION.txt
-%{_datadir}/pdfcraft/models/text-detection.rten
-%{_datadir}/pdfcraft/models/text-detection.rten.LICENCE.txt
-%{_datadir}/pdfcraft/models/text-recognition.rten
-%{_datadir}/pdfcraft/models/text-recognition.rten.LICENCE.txt
+%{_datadir}/pdfcraft/models/text-detection.onnx
+%{_datadir}/pdfcraft/models/text-detection.onnx.LICENCE.txt
+%{_datadir}/pdfcraft/models/text-recognition.onnx
+%{_datadir}/pdfcraft/models/text-recognition.onnx.LICENCE.txt
 
 %changelog
+* Wed Oct 28 2026 github-actions[bot] <github-actions[bot]@users.noreply.github.com> - 0.15.0-1
+- update to 0.15.0
+
 * Sun Oct 25 2026 Gustavo Bosmak <gustavo.bosmak@gmail.com> - 0.14.0-1
 - update to 0.14.0
 
