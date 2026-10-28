@@ -5,7 +5,7 @@
 %global __strip /bin/true
 
 Name:           designcraft
-Version:        0.13.0
+Version:        0.14.0
 Release:        1%{?dist}
 Summary:        Open-source page layout and publishing app
 License:        MIT OR Apache-2.0
@@ -59,11 +59,18 @@ install -Dm755 payload/usr/bin/designcraft-cli %{buildroot}%{_bindir}/designcraf
 install -Dm644 payload/usr/share/applications/ai.storyteller.designcraft.desktop %{buildroot}%{_datadir}/applications/ai.storyteller.designcraft.desktop
 install -Dm644 payload/usr/share/doc/designcraft/LICENSE-APACHE %{buildroot}%{_licensedir}/designcraft/LICENSE-APACHE
 install -Dm644 payload/usr/share/doc/designcraft/LICENSE-MIT %{buildroot}%{_licensedir}/designcraft/LICENSE-MIT
+install -Dm644 payload/usr/share/doc/designcraft/NOTICE %{buildroot}%{_licensedir}/designcraft/NOTICE
 install -Dm644 payload/usr/share/doc/designcraft/OFL-biz-ud-mincho.txt %{buildroot}%{_licensedir}/designcraft/OFL-biz-ud-mincho.txt
 install -Dm644 payload/usr/share/doc/designcraft/OFL-biz-ud-pgothic.txt %{buildroot}%{_licensedir}/designcraft/OFL-biz-ud-pgothic.txt
+install -Dm644 payload/usr/share/doc/designcraft/OFL-lxgw-wenkai-lite.txt %{buildroot}%{_licensedir}/designcraft/OFL-lxgw-wenkai-lite.txt
+install -Dm644 payload/usr/share/doc/designcraft/OFL-nanum-gothic.txt %{buildroot}%{_licensedir}/designcraft/OFL-nanum-gothic.txt
 install -Dm644 payload/usr/share/doc/designcraft/OFL-noto-sans-arabic.txt %{buildroot}%{_licensedir}/designcraft/OFL-noto-sans-arabic.txt
 install -Dm644 payload/usr/share/doc/designcraft/OFL-noto-sans-cjk-sc.txt %{buildroot}%{_licensedir}/designcraft/OFL-noto-sans-cjk-sc.txt
+install -Dm644 payload/usr/share/doc/designcraft/OFL-noto-sans-devanagari.txt %{buildroot}%{_licensedir}/designcraft/OFL-noto-sans-devanagari.txt
 install -Dm644 payload/usr/share/doc/designcraft/OFL-noto-sans-georgian.txt %{buildroot}%{_licensedir}/designcraft/OFL-noto-sans-georgian.txt
+install -Dm644 payload/usr/share/doc/designcraft/OFL-noto-sans-hebrew.txt %{buildroot}%{_licensedir}/designcraft/OFL-noto-sans-hebrew.txt
+install -Dm644 payload/usr/share/doc/designcraft/OFL-noto-sans-symbols-2.txt %{buildroot}%{_licensedir}/designcraft/OFL-noto-sans-symbols-2.txt
+install -Dm644 payload/usr/share/doc/designcraft/OFL-noto-sans-symbols.txt %{buildroot}%{_licensedir}/designcraft/OFL-noto-sans-symbols.txt
 install -Dm644 payload/usr/share/doc/designcraft/OFL-noto-sans-thai.txt %{buildroot}%{_licensedir}/designcraft/OFL-noto-sans-thai.txt
 install -Dm644 payload/usr/share/doc/designcraft/OFL-shippori-mincho.txt %{buildroot}%{_licensedir}/designcraft/OFL-shippori-mincho.txt
 install -Dm644 payload/usr/share/doc/designcraft/README.md %{buildroot}%{_docdir}/designcraft/README.md
@@ -106,6 +113,7 @@ fi
 %files
 %license %{_licensedir}/designcraft/LICENSE-APACHE
 %license %{_licensedir}/designcraft/LICENSE-MIT
+%license %{_licensedir}/designcraft/NOTICE
 %license %{_licensedir}/designcraft/OFL-*
 %doc %{_docdir}/designcraft/README.md
 %{_bindir}/designcraft
@@ -117,6 +125,9 @@ fi
 %{_datadir}/mime/packages/ai.storyteller.designcraft.xml
 
 %changelog
+* Wed Oct 28 2026 github-actions[bot] <github-actions[bot]@users.noreply.github.com> - 0.14.0-1
+- update to 0.14.0
+
 * Sun Oct 25 2026 Gustavo Bosmak <gustavo.bosmak@gmail.com> - 0.13.0-1
 - update to 0.13.0
 
