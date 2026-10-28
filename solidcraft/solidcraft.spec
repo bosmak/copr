@@ -5,7 +5,7 @@
 %global __strip /bin/true
 
 Name:           solidcraft
-Version:        0.24.0
+Version:        0.25.1
 Release:        1%{?dist}
 Summary:        Open-source parametric 3D CAD application
 License:        MIT OR Apache-2.0
@@ -79,22 +79,22 @@ rpm2archive -n %{SOURCE0} | tar -xf - -C payload
 install -Dm755 payload/usr/bin/solidcraft %{buildroot}%{_bindir}/solidcraft
 install -Dm755 payload/usr/bin/solidcraft-cli %{buildroot}%{_bindir}/solidcraft-cli
 install -Dm755 payload/usr/bin/solvecraft-cli %{buildroot}%{_bindir}/solvecraft-cli
-install -Dm644 payload/usr/share/applications/ai.storyteller.solidcraft.desktop %{buildroot}%{_datadir}/applications/ai.storyteller.solidcraft.desktop
+install -Dm644 payload/usr/share/applications/io.tangencylabs.solidcraft.desktop %{buildroot}%{_datadir}/applications/io.tangencylabs.solidcraft.desktop
 install -Dm644 payload/usr/share/doc/solidcraft/LICENSE-APACHE %{buildroot}%{_licensedir}/solidcraft/LICENSE-APACHE
 install -Dm644 payload/usr/share/doc/solidcraft/LICENSE-MIT %{buildroot}%{_licensedir}/solidcraft/LICENSE-MIT
 install -Dm644 payload/usr/share/doc/solidcraft/NOTICE %{buildroot}%{_licensedir}/solidcraft/NOTICE
 install -Dm644 payload/usr/share/doc/solidcraft/README.md %{buildroot}%{_docdir}/solidcraft/README.md
 install -Dm644 payload/usr/share/doc/solidcraft/THIRD-PARTY-LICENSES.txt %{buildroot}%{_docdir}/solidcraft/THIRD-PARTY-LICENSES.txt
-install -Dm644 payload/usr/share/icons/hicolor/128x128/apps/ai.storyteller.solidcraft.png %{buildroot}%{_datadir}/icons/hicolor/128x128/apps/ai.storyteller.solidcraft.png
-install -Dm644 payload/usr/share/icons/hicolor/16x16/apps/ai.storyteller.solidcraft.png %{buildroot}%{_datadir}/icons/hicolor/16x16/apps/ai.storyteller.solidcraft.png
-install -Dm644 payload/usr/share/icons/hicolor/24x24/apps/ai.storyteller.solidcraft.png %{buildroot}%{_datadir}/icons/hicolor/24x24/apps/ai.storyteller.solidcraft.png
-install -Dm644 payload/usr/share/icons/hicolor/256x256/apps/ai.storyteller.solidcraft.png %{buildroot}%{_datadir}/icons/hicolor/256x256/apps/ai.storyteller.solidcraft.png
-install -Dm644 payload/usr/share/icons/hicolor/32x32/apps/ai.storyteller.solidcraft.png %{buildroot}%{_datadir}/icons/hicolor/32x32/apps/ai.storyteller.solidcraft.png
-install -Dm644 payload/usr/share/icons/hicolor/48x48/apps/ai.storyteller.solidcraft.png %{buildroot}%{_datadir}/icons/hicolor/48x48/apps/ai.storyteller.solidcraft.png
-install -Dm644 payload/usr/share/icons/hicolor/512x512/apps/ai.storyteller.solidcraft.png %{buildroot}%{_datadir}/icons/hicolor/512x512/apps/ai.storyteller.solidcraft.png
-install -Dm644 payload/usr/share/icons/hicolor/64x64/apps/ai.storyteller.solidcraft.png %{buildroot}%{_datadir}/icons/hicolor/64x64/apps/ai.storyteller.solidcraft.png
-install -Dm644 payload/usr/share/metainfo/ai.storyteller.solidcraft.metainfo.xml %{buildroot}%{_datadir}/metainfo/ai.storyteller.solidcraft.metainfo.xml
-install -Dm644 payload/usr/share/mime/packages/ai.storyteller.solidcraft.xml %{buildroot}%{_datadir}/mime/packages/ai.storyteller.solidcraft.xml
+install -Dm644 payload/usr/share/icons/hicolor/128x128/apps/io.tangencylabs.solidcraft.png %{buildroot}%{_datadir}/icons/hicolor/128x128/apps/io.tangencylabs.solidcraft.png
+install -Dm644 payload/usr/share/icons/hicolor/16x16/apps/io.tangencylabs.solidcraft.png %{buildroot}%{_datadir}/icons/hicolor/16x16/apps/io.tangencylabs.solidcraft.png
+install -Dm644 payload/usr/share/icons/hicolor/24x24/apps/io.tangencylabs.solidcraft.png %{buildroot}%{_datadir}/icons/hicolor/24x24/apps/io.tangencylabs.solidcraft.png
+install -Dm644 payload/usr/share/icons/hicolor/256x256/apps/io.tangencylabs.solidcraft.png %{buildroot}%{_datadir}/icons/hicolor/256x256/apps/io.tangencylabs.solidcraft.png
+install -Dm644 payload/usr/share/icons/hicolor/32x32/apps/io.tangencylabs.solidcraft.png %{buildroot}%{_datadir}/icons/hicolor/32x32/apps/io.tangencylabs.solidcraft.png
+install -Dm644 payload/usr/share/icons/hicolor/48x48/apps/io.tangencylabs.solidcraft.png %{buildroot}%{_datadir}/icons/hicolor/48x48/apps/io.tangencylabs.solidcraft.png
+install -Dm644 payload/usr/share/icons/hicolor/512x512/apps/io.tangencylabs.solidcraft.png %{buildroot}%{_datadir}/icons/hicolor/512x512/apps/io.tangencylabs.solidcraft.png
+install -Dm644 payload/usr/share/icons/hicolor/64x64/apps/io.tangencylabs.solidcraft.png %{buildroot}%{_datadir}/icons/hicolor/64x64/apps/io.tangencylabs.solidcraft.png
+install -Dm644 payload/usr/share/metainfo/io.tangencylabs.solidcraft.metainfo.xml %{buildroot}%{_datadir}/metainfo/io.tangencylabs.solidcraft.metainfo.xml
+install -Dm644 payload/usr/share/mime/packages/io.tangencylabs.solidcraft.xml %{buildroot}%{_datadir}/mime/packages/io.tangencylabs.solidcraft.xml
 
 %post
 # Refresh the desktop entry, the MIME database and the icon cache. Every
@@ -129,12 +129,15 @@ fi
 %{_bindir}/solidcraft
 %{_bindir}/solidcraft-cli
 %{_bindir}/solvecraft-cli
-%{_datadir}/applications/ai.storyteller.solidcraft.desktop
-%{_datadir}/icons/hicolor/*/apps/ai.storyteller.solidcraft.png
-%{_datadir}/metainfo/ai.storyteller.solidcraft.metainfo.xml
-%{_datadir}/mime/packages/ai.storyteller.solidcraft.xml
+%{_datadir}/applications/io.tangencylabs.solidcraft.desktop
+%{_datadir}/icons/hicolor/*/apps/io.tangencylabs.solidcraft.png
+%{_datadir}/metainfo/io.tangencylabs.solidcraft.metainfo.xml
+%{_datadir}/mime/packages/io.tangencylabs.solidcraft.xml
 
 %changelog
+* Wed Oct 28 2026 github-actions[bot] <github-actions[bot]@users.noreply.github.com> - 0.25.1-1
+- update to 0.25.1
+
 * Tue Oct 27 2026 github-actions[bot] <github-actions[bot]@users.noreply.github.com> - 0.24.0-1
 - update to 0.24.0
 
