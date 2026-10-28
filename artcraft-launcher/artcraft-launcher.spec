@@ -5,7 +5,7 @@
 %global __strip /bin/true
 
 Name:           artcraft-launcher
-Version:        0.8.1
+Version:        0.9.0
 Release:        1%{?dist}
 Summary:        Install, update and launch the Craft App Suite
 License:        MIT OR Apache-2.0
@@ -122,5 +122,8 @@ fi
 %{_datadir}/metainfo/ai.storyteller.artcraft-launcher.metainfo.xml
 
 %changelog
+* Wed Oct 28 2026 github-actions[bot] <github-actions[bot]@users.noreply.github.com> - 0.9.0-1
+- update to 0.9.0
+
 * Sun Oct 25 2026 Gustavo Bosmak <gustavo.bosmak@gmail.com> - 0.8.1-1
 - initial COPR package (rebundle of the upstream RPM)
