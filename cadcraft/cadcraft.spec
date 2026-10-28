@@ -5,7 +5,7 @@
 %global __strip /bin/true
 
 Name:           cadcraft
-Version:        0.13.0
+Version:        0.14.0
 Release:        1%{?dist}
 Summary:        Open-source computer-aided design and drafting app
 License:        MIT OR Apache-2.0
@@ -57,15 +57,26 @@ rpm2archive -n %{SOURCE0} | tar -xf - -C payload
 install -Dm755 payload/usr/bin/cadcraft %{buildroot}%{_bindir}/cadcraft
 install -Dm755 payload/usr/bin/cadcraft-cli %{buildroot}%{_bindir}/cadcraft-cli
 install -Dm644 payload/usr/share/applications/ai.storyteller.cadcraft.desktop %{buildroot}%{_datadir}/applications/ai.storyteller.cadcraft.desktop
+install -Dm644 payload/usr/share/bash-completion/completions/cadcraft-cli %{buildroot}%{_datadir}/bash-completion/completions/cadcraft-cli
+install -Dm644 payload/usr/share/doc/cadcraft/ATTRIBUTION.md %{buildroot}%{_docdir}/cadcraft/ATTRIBUTION.md
 install -Dm644 payload/usr/share/doc/cadcraft/LICENSE-APACHE %{buildroot}%{_licensedir}/cadcraft/LICENSE-APACHE
 install -Dm644 payload/usr/share/doc/cadcraft/LICENSE-MIT %{buildroot}%{_licensedir}/cadcraft/LICENSE-MIT
+install -Dm644 payload/usr/share/doc/cadcraft/NOTICE %{buildroot}%{_licensedir}/cadcraft/NOTICE
 install -Dm644 payload/usr/share/doc/cadcraft/OFL-biz-ud-mincho.txt %{buildroot}%{_licensedir}/cadcraft/OFL-biz-ud-mincho.txt
 install -Dm644 payload/usr/share/doc/cadcraft/OFL-biz-ud-pgothic.txt %{buildroot}%{_licensedir}/cadcraft/OFL-biz-ud-pgothic.txt
+install -Dm644 payload/usr/share/doc/cadcraft/OFL-lxgw-wenkai-lite.txt %{buildroot}%{_licensedir}/cadcraft/OFL-lxgw-wenkai-lite.txt
+install -Dm644 payload/usr/share/doc/cadcraft/OFL-nanum-gothic.txt %{buildroot}%{_licensedir}/cadcraft/OFL-nanum-gothic.txt
 install -Dm644 payload/usr/share/doc/cadcraft/OFL-noto-sans-arabic.txt %{buildroot}%{_licensedir}/cadcraft/OFL-noto-sans-arabic.txt
 install -Dm644 payload/usr/share/doc/cadcraft/OFL-noto-sans-cjk-sc.txt %{buildroot}%{_licensedir}/cadcraft/OFL-noto-sans-cjk-sc.txt
+install -Dm644 payload/usr/share/doc/cadcraft/OFL-noto-sans-devanagari.txt %{buildroot}%{_licensedir}/cadcraft/OFL-noto-sans-devanagari.txt
+install -Dm644 payload/usr/share/doc/cadcraft/OFL-noto-sans-georgian.txt %{buildroot}%{_licensedir}/cadcraft/OFL-noto-sans-georgian.txt
+install -Dm644 payload/usr/share/doc/cadcraft/OFL-noto-sans-hebrew.txt %{buildroot}%{_licensedir}/cadcraft/OFL-noto-sans-hebrew.txt
+install -Dm644 payload/usr/share/doc/cadcraft/OFL-noto-sans-symbols-2.txt %{buildroot}%{_licensedir}/cadcraft/OFL-noto-sans-symbols-2.txt
+install -Dm644 payload/usr/share/doc/cadcraft/OFL-noto-sans-symbols.txt %{buildroot}%{_licensedir}/cadcraft/OFL-noto-sans-symbols.txt
 install -Dm644 payload/usr/share/doc/cadcraft/OFL-noto-sans-thai.txt %{buildroot}%{_licensedir}/cadcraft/OFL-noto-sans-thai.txt
 install -Dm644 payload/usr/share/doc/cadcraft/OFL-shippori-mincho.txt %{buildroot}%{_licensedir}/cadcraft/OFL-shippori-mincho.txt
 install -Dm644 payload/usr/share/doc/cadcraft/README.md %{buildroot}%{_docdir}/cadcraft/README.md
+install -Dm644 payload/usr/share/fish/vendor_completions.d/cadcraft-cli.fish %{buildroot}%{_datadir}/fish/vendor_completions.d/cadcraft-cli.fish
 install -Dm644 payload/usr/share/icons/hicolor/128x128/apps/ai.storyteller.cadcraft.png %{buildroot}%{_datadir}/icons/hicolor/128x128/apps/ai.storyteller.cadcraft.png
 install -Dm644 payload/usr/share/icons/hicolor/16x16/apps/ai.storyteller.cadcraft.png %{buildroot}%{_datadir}/icons/hicolor/16x16/apps/ai.storyteller.cadcraft.png
 install -Dm644 payload/usr/share/icons/hicolor/24x24/apps/ai.storyteller.cadcraft.png %{buildroot}%{_datadir}/icons/hicolor/24x24/apps/ai.storyteller.cadcraft.png
@@ -74,8 +85,17 @@ install -Dm644 payload/usr/share/icons/hicolor/32x32/apps/ai.storyteller.cadcraf
 install -Dm644 payload/usr/share/icons/hicolor/48x48/apps/ai.storyteller.cadcraft.png %{buildroot}%{_datadir}/icons/hicolor/48x48/apps/ai.storyteller.cadcraft.png
 install -Dm644 payload/usr/share/icons/hicolor/512x512/apps/ai.storyteller.cadcraft.png %{buildroot}%{_datadir}/icons/hicolor/512x512/apps/ai.storyteller.cadcraft.png
 install -Dm644 payload/usr/share/icons/hicolor/64x64/apps/ai.storyteller.cadcraft.png %{buildroot}%{_datadir}/icons/hicolor/64x64/apps/ai.storyteller.cadcraft.png
+install -Dm644 payload/usr/share/man/man1/cadcraft-cli-commands.1 %{buildroot}%{_mandir}/man1/cadcraft-cli-commands.1
+install -Dm644 payload/usr/share/man/man1/cadcraft-cli-convert.1 %{buildroot}%{_mandir}/man1/cadcraft-cli-convert.1
+install -Dm644 payload/usr/share/man/man1/cadcraft-cli-info.1 %{buildroot}%{_mandir}/man1/cadcraft-cli-info.1
+install -Dm644 payload/usr/share/man/man1/cadcraft-cli-mcp.1 %{buildroot}%{_mandir}/man1/cadcraft-cli-mcp.1
+install -Dm644 payload/usr/share/man/man1/cadcraft-cli-perf.1 %{buildroot}%{_mandir}/man1/cadcraft-cli-perf.1
+install -Dm644 payload/usr/share/man/man1/cadcraft-cli-run.1 %{buildroot}%{_mandir}/man1/cadcraft-cli-run.1
+install -Dm644 payload/usr/share/man/man1/cadcraft-cli-sample.1 %{buildroot}%{_mandir}/man1/cadcraft-cli-sample.1
+install -Dm644 payload/usr/share/man/man1/cadcraft-cli.1 %{buildroot}%{_mandir}/man1/cadcraft-cli.1
 install -Dm644 payload/usr/share/metainfo/ai.storyteller.cadcraft.metainfo.xml %{buildroot}%{_datadir}/metainfo/ai.storyteller.cadcraft.metainfo.xml
 install -Dm644 payload/usr/share/mime/packages/ai.storyteller.cadcraft.xml %{buildroot}%{_datadir}/mime/packages/ai.storyteller.cadcraft.xml
+install -Dm644 payload/usr/share/zsh/site-functions/_cadcraft-cli %{buildroot}%{_datadir}/zsh/site-functions/_cadcraft-cli
 
 %post
 # Refresh the desktop entry, the MIME database and the icon cache. Every
@@ -104,16 +124,32 @@ fi
 %files
 %license %{_licensedir}/cadcraft/LICENSE-APACHE
 %license %{_licensedir}/cadcraft/LICENSE-MIT
+%license %{_licensedir}/cadcraft/NOTICE
 %license %{_licensedir}/cadcraft/OFL-*
+%doc %{_docdir}/cadcraft/ATTRIBUTION.md
 %doc %{_docdir}/cadcraft/README.md
 %{_bindir}/cadcraft
 %{_bindir}/cadcraft-cli
 %{_datadir}/applications/ai.storyteller.cadcraft.desktop
+%{_datadir}/bash-completion/completions/cadcraft-cli
+%{_datadir}/fish/vendor_completions.d/cadcraft-cli.fish
 %{_datadir}/icons/hicolor/*/apps/ai.storyteller.cadcraft.png
+%{_mandir}/man1/cadcraft-cli-commands.1*
+%{_mandir}/man1/cadcraft-cli-convert.1*
+%{_mandir}/man1/cadcraft-cli-info.1*
+%{_mandir}/man1/cadcraft-cli-mcp.1*
+%{_mandir}/man1/cadcraft-cli-perf.1*
+%{_mandir}/man1/cadcraft-cli-run.1*
+%{_mandir}/man1/cadcraft-cli-sample.1*
+%{_mandir}/man1/cadcraft-cli.1*
 %{_datadir}/metainfo/ai.storyteller.cadcraft.metainfo.xml
 %{_datadir}/mime/packages/ai.storyteller.cadcraft.xml
+%{_datadir}/zsh/site-functions/_cadcraft-cli
 
 %changelog
+* Wed Oct 28 2026 github-actions[bot] <github-actions[bot]@users.noreply.github.com> - 0.14.0-1
+- update to 0.14.0
+
 * Sun Oct 25 2026 Gustavo Bosmak <gustavo.bosmak@gmail.com> - 0.13.0-1
 - update to 0.13.0
 
