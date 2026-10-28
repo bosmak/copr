@@ -5,7 +5,7 @@
 %global __strip /bin/true
 
 Name:           soundcraft
-Version:        0.13.1
+Version:        0.14.0
 Release:        1%{?dist}
 Summary:        Open-source digital audio workstation: record, edit and mix
 License:        MIT OR Apache-2.0
@@ -58,11 +58,13 @@ rpm2archive -n %{SOURCE0} | tar -xf - -C payload
 install -Dm755 payload/usr/bin/soundcraft %{buildroot}%{_bindir}/soundcraft
 install -Dm755 payload/usr/bin/soundcraft-cli %{buildroot}%{_bindir}/soundcraft-cli
 install -Dm644 payload/usr/share/applications/ai.storyteller.soundcraft.desktop %{buildroot}%{_datadir}/applications/ai.storyteller.soundcraft.desktop
+install -Dm644 payload/usr/share/bash-completion/completions/soundcraft-cli %{buildroot}%{_datadir}/bash-completion/completions/soundcraft-cli
 install -Dm644 payload/usr/share/doc/soundcraft/ATTRIBUTION.md %{buildroot}%{_docdir}/soundcraft/ATTRIBUTION.md
 install -Dm644 payload/usr/share/doc/soundcraft/LICENSE-APACHE %{buildroot}%{_licensedir}/soundcraft/LICENSE-APACHE
 install -Dm644 payload/usr/share/doc/soundcraft/LICENSE-MIT %{buildroot}%{_licensedir}/soundcraft/LICENSE-MIT
 install -Dm644 payload/usr/share/doc/soundcraft/NOTICE %{buildroot}%{_licensedir}/soundcraft/NOTICE
 install -Dm644 payload/usr/share/doc/soundcraft/README.md %{buildroot}%{_docdir}/soundcraft/README.md
+install -Dm644 payload/usr/share/fish/vendor_completions.d/soundcraft-cli.fish %{buildroot}%{_datadir}/fish/vendor_completions.d/soundcraft-cli.fish
 install -Dm644 payload/usr/share/icons/hicolor/128x128/apps/ai.storyteller.soundcraft.png %{buildroot}%{_datadir}/icons/hicolor/128x128/apps/ai.storyteller.soundcraft.png
 install -Dm644 payload/usr/share/icons/hicolor/16x16/apps/ai.storyteller.soundcraft.png %{buildroot}%{_datadir}/icons/hicolor/16x16/apps/ai.storyteller.soundcraft.png
 install -Dm644 payload/usr/share/icons/hicolor/24x24/apps/ai.storyteller.soundcraft.png %{buildroot}%{_datadir}/icons/hicolor/24x24/apps/ai.storyteller.soundcraft.png
@@ -72,8 +74,20 @@ install -Dm644 payload/usr/share/icons/hicolor/48x48/apps/ai.storyteller.soundcr
 install -Dm644 payload/usr/share/icons/hicolor/512x512/apps/ai.storyteller.soundcraft.png %{buildroot}%{_datadir}/icons/hicolor/512x512/apps/ai.storyteller.soundcraft.png
 install -Dm644 payload/usr/share/icons/hicolor/64x64/apps/ai.storyteller.soundcraft.png %{buildroot}%{_datadir}/icons/hicolor/64x64/apps/ai.storyteller.soundcraft.png
 install -Dm644 payload/usr/share/icons/hicolor/scalable/apps/ai.storyteller.soundcraft.svg %{buildroot}%{_datadir}/icons/hicolor/scalable/apps/ai.storyteller.soundcraft.svg
+install -Dm644 payload/usr/share/man/man1/soundcraft-cli-app.1 %{buildroot}%{_mandir}/man1/soundcraft-cli-app.1
+install -Dm644 payload/usr/share/man/man1/soundcraft-cli-commands.1 %{buildroot}%{_mandir}/man1/soundcraft-cli-commands.1
+install -Dm644 payload/usr/share/man/man1/soundcraft-cli-convert.1 %{buildroot}%{_mandir}/man1/soundcraft-cli-convert.1
+install -Dm644 payload/usr/share/man/man1/soundcraft-cli-describe.1 %{buildroot}%{_mandir}/man1/soundcraft-cli-describe.1
+install -Dm644 payload/usr/share/man/man1/soundcraft-cli-info.1 %{buildroot}%{_mandir}/man1/soundcraft-cli-info.1
+install -Dm644 payload/usr/share/man/man1/soundcraft-cli-mcp.1 %{buildroot}%{_mandir}/man1/soundcraft-cli-mcp.1
+install -Dm644 payload/usr/share/man/man1/soundcraft-cli-parity.1 %{buildroot}%{_mandir}/man1/soundcraft-cli-parity.1
+install -Dm644 payload/usr/share/man/man1/soundcraft-cli-plugins.1 %{buildroot}%{_mandir}/man1/soundcraft-cli-plugins.1
+install -Dm644 payload/usr/share/man/man1/soundcraft-cli-run.1 %{buildroot}%{_mandir}/man1/soundcraft-cli-run.1
+install -Dm644 payload/usr/share/man/man1/soundcraft-cli-script.1 %{buildroot}%{_mandir}/man1/soundcraft-cli-script.1
+install -Dm644 payload/usr/share/man/man1/soundcraft-cli.1 %{buildroot}%{_mandir}/man1/soundcraft-cli.1
 install -Dm644 payload/usr/share/metainfo/ai.storyteller.soundcraft.metainfo.xml %{buildroot}%{_datadir}/metainfo/ai.storyteller.soundcraft.metainfo.xml
 install -Dm644 payload/usr/share/mime/packages/ai.storyteller.soundcraft.xml %{buildroot}%{_datadir}/mime/packages/ai.storyteller.soundcraft.xml
+install -Dm644 payload/usr/share/zsh/site-functions/_soundcraft-cli %{buildroot}%{_datadir}/zsh/site-functions/_soundcraft-cli
 
 %post
 # Refresh the desktop entry, the MIME database and the icon cache. Every
@@ -108,12 +122,29 @@ fi
 %{_bindir}/soundcraft
 %{_bindir}/soundcraft-cli
 %{_datadir}/applications/ai.storyteller.soundcraft.desktop
+%{_datadir}/bash-completion/completions/soundcraft-cli
+%{_datadir}/fish/vendor_completions.d/soundcraft-cli.fish
 %{_datadir}/icons/hicolor/*/apps/ai.storyteller.soundcraft.png
 %{_datadir}/icons/hicolor/*/apps/ai.storyteller.soundcraft.svg
+%{_mandir}/man1/soundcraft-cli-app.1*
+%{_mandir}/man1/soundcraft-cli-commands.1*
+%{_mandir}/man1/soundcraft-cli-convert.1*
+%{_mandir}/man1/soundcraft-cli-describe.1*
+%{_mandir}/man1/soundcraft-cli-info.1*
+%{_mandir}/man1/soundcraft-cli-mcp.1*
+%{_mandir}/man1/soundcraft-cli-parity.1*
+%{_mandir}/man1/soundcraft-cli-plugins.1*
+%{_mandir}/man1/soundcraft-cli-run.1*
+%{_mandir}/man1/soundcraft-cli-script.1*
+%{_mandir}/man1/soundcraft-cli.1*
 %{_datadir}/metainfo/ai.storyteller.soundcraft.metainfo.xml
 %{_datadir}/mime/packages/ai.storyteller.soundcraft.xml
+%{_datadir}/zsh/site-functions/_soundcraft-cli
 
 %changelog
+* Wed Oct 28 2026 github-actions[bot] <github-actions[bot]@users.noreply.github.com> - 0.14.0-1
+- update to 0.14.0
+
 * Sun Oct 25 2026 Gustavo Bosmak <gustavo.bosmak@gmail.com> - 0.13.1-1
 - update to 0.13.1
 
