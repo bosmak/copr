@@ -5,7 +5,7 @@
 %global __strip /bin/true
 
 Name:           vectorcraft
-Version:        0.17.0
+Version:        0.18.0
 Release:        1%{?dist}
 Summary:        Open-source vector illustration app
 License:        MIT OR Apache-2.0
@@ -63,9 +63,15 @@ install -Dm644 payload/usr/share/doc/vectorcraft/LICENSE-MIT %{buildroot}%{_lice
 install -Dm644 payload/usr/share/doc/vectorcraft/NOTICE %{buildroot}%{_licensedir}/vectorcraft/NOTICE
 install -Dm644 payload/usr/share/doc/vectorcraft/OFL-biz-ud-mincho.txt %{buildroot}%{_licensedir}/vectorcraft/OFL-biz-ud-mincho.txt
 install -Dm644 payload/usr/share/doc/vectorcraft/OFL-biz-ud-pgothic.txt %{buildroot}%{_licensedir}/vectorcraft/OFL-biz-ud-pgothic.txt
+install -Dm644 payload/usr/share/doc/vectorcraft/OFL-lxgw-wenkai-lite.txt %{buildroot}%{_licensedir}/vectorcraft/OFL-lxgw-wenkai-lite.txt
+install -Dm644 payload/usr/share/doc/vectorcraft/OFL-nanum-gothic.txt %{buildroot}%{_licensedir}/vectorcraft/OFL-nanum-gothic.txt
 install -Dm644 payload/usr/share/doc/vectorcraft/OFL-noto-sans-arabic.txt %{buildroot}%{_licensedir}/vectorcraft/OFL-noto-sans-arabic.txt
 install -Dm644 payload/usr/share/doc/vectorcraft/OFL-noto-sans-cjk-sc.txt %{buildroot}%{_licensedir}/vectorcraft/OFL-noto-sans-cjk-sc.txt
+install -Dm644 payload/usr/share/doc/vectorcraft/OFL-noto-sans-devanagari.txt %{buildroot}%{_licensedir}/vectorcraft/OFL-noto-sans-devanagari.txt
 install -Dm644 payload/usr/share/doc/vectorcraft/OFL-noto-sans-georgian.txt %{buildroot}%{_licensedir}/vectorcraft/OFL-noto-sans-georgian.txt
+install -Dm644 payload/usr/share/doc/vectorcraft/OFL-noto-sans-hebrew.txt %{buildroot}%{_licensedir}/vectorcraft/OFL-noto-sans-hebrew.txt
+install -Dm644 payload/usr/share/doc/vectorcraft/OFL-noto-sans-symbols-2.txt %{buildroot}%{_licensedir}/vectorcraft/OFL-noto-sans-symbols-2.txt
+install -Dm644 payload/usr/share/doc/vectorcraft/OFL-noto-sans-symbols.txt %{buildroot}%{_licensedir}/vectorcraft/OFL-noto-sans-symbols.txt
 install -Dm644 payload/usr/share/doc/vectorcraft/OFL-noto-sans-thai.txt %{buildroot}%{_licensedir}/vectorcraft/OFL-noto-sans-thai.txt
 install -Dm644 payload/usr/share/doc/vectorcraft/OFL-shippori-mincho.txt %{buildroot}%{_licensedir}/vectorcraft/OFL-shippori-mincho.txt
 install -Dm644 payload/usr/share/doc/vectorcraft/README.md %{buildroot}%{_docdir}/vectorcraft/README.md
@@ -133,6 +139,9 @@ fi
 %{_datadir}/mime/packages/ai.storyteller.vectorcraft.xml
 
 %changelog
+* Wed Oct 28 2026 github-actions[bot] <github-actions[bot]@users.noreply.github.com> - 0.18.0-1
+- update to 0.18.0
+
 * Sun Oct 25 2026 Gustavo Bosmak <gustavo.bosmak@gmail.com> - 0.17.0-1
 - update to 0.17.0
 
