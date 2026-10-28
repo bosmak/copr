@@ -5,7 +5,7 @@
 %global __strip /bin/true
 
 Name:           gridcraft
-Version:        0.12.1
+Version:        0.13.0
 Release:        1%{?dist}
 Summary:        Open-source spreadsheet that works the way Excel users expect
 License:        MIT OR Apache-2.0
@@ -57,10 +57,22 @@ rpm2archive -n %{SOURCE0} | tar -xf - -C payload
 install -Dm755 payload/usr/bin/gridcraft %{buildroot}%{_bindir}/gridcraft
 install -Dm755 payload/usr/bin/gridcraft-cli %{buildroot}%{_bindir}/gridcraft-cli
 install -Dm644 payload/usr/share/applications/ai.storyteller.gridcraft.desktop %{buildroot}%{_datadir}/applications/ai.storyteller.gridcraft.desktop
+install -Dm644 payload/usr/share/doc/gridcraft/ATTRIBUTION.md %{buildroot}%{_docdir}/gridcraft/ATTRIBUTION.md
 install -Dm644 payload/usr/share/doc/gridcraft/LICENSE-APACHE %{buildroot}%{_licensedir}/gridcraft/LICENSE-APACHE
 install -Dm644 payload/usr/share/doc/gridcraft/LICENSE-MIT %{buildroot}%{_licensedir}/gridcraft/LICENSE-MIT
+install -Dm644 payload/usr/share/doc/gridcraft/NOTICE %{buildroot}%{_licensedir}/gridcraft/NOTICE
 install -Dm644 payload/usr/share/doc/gridcraft/OFL-biz-ud-mincho.txt %{buildroot}%{_licensedir}/gridcraft/OFL-biz-ud-mincho.txt
 install -Dm644 payload/usr/share/doc/gridcraft/OFL-biz-ud-pgothic.txt %{buildroot}%{_licensedir}/gridcraft/OFL-biz-ud-pgothic.txt
+install -Dm644 payload/usr/share/doc/gridcraft/OFL-lxgw-wenkai-lite.txt %{buildroot}%{_licensedir}/gridcraft/OFL-lxgw-wenkai-lite.txt
+install -Dm644 payload/usr/share/doc/gridcraft/OFL-nanum-gothic.txt %{buildroot}%{_licensedir}/gridcraft/OFL-nanum-gothic.txt
+install -Dm644 payload/usr/share/doc/gridcraft/OFL-noto-sans-arabic.txt %{buildroot}%{_licensedir}/gridcraft/OFL-noto-sans-arabic.txt
+install -Dm644 payload/usr/share/doc/gridcraft/OFL-noto-sans-cjk-sc.txt %{buildroot}%{_licensedir}/gridcraft/OFL-noto-sans-cjk-sc.txt
+install -Dm644 payload/usr/share/doc/gridcraft/OFL-noto-sans-devanagari.txt %{buildroot}%{_licensedir}/gridcraft/OFL-noto-sans-devanagari.txt
+install -Dm644 payload/usr/share/doc/gridcraft/OFL-noto-sans-georgian.txt %{buildroot}%{_licensedir}/gridcraft/OFL-noto-sans-georgian.txt
+install -Dm644 payload/usr/share/doc/gridcraft/OFL-noto-sans-hebrew.txt %{buildroot}%{_licensedir}/gridcraft/OFL-noto-sans-hebrew.txt
+install -Dm644 payload/usr/share/doc/gridcraft/OFL-noto-sans-symbols-2.txt %{buildroot}%{_licensedir}/gridcraft/OFL-noto-sans-symbols-2.txt
+install -Dm644 payload/usr/share/doc/gridcraft/OFL-noto-sans-symbols.txt %{buildroot}%{_licensedir}/gridcraft/OFL-noto-sans-symbols.txt
+install -Dm644 payload/usr/share/doc/gridcraft/OFL-noto-sans-thai.txt %{buildroot}%{_licensedir}/gridcraft/OFL-noto-sans-thai.txt
 install -Dm644 payload/usr/share/doc/gridcraft/OFL-shippori-mincho.txt %{buildroot}%{_licensedir}/gridcraft/OFL-shippori-mincho.txt
 install -Dm644 payload/usr/share/doc/gridcraft/README.md %{buildroot}%{_docdir}/gridcraft/README.md
 install -Dm644 payload/usr/share/icons/hicolor/128x128/apps/ai.storyteller.gridcraft.png %{buildroot}%{_datadir}/icons/hicolor/128x128/apps/ai.storyteller.gridcraft.png
@@ -102,7 +114,9 @@ fi
 %files
 %license %{_licensedir}/gridcraft/LICENSE-APACHE
 %license %{_licensedir}/gridcraft/LICENSE-MIT
+%license %{_licensedir}/gridcraft/NOTICE
 %license %{_licensedir}/gridcraft/OFL-*
+%doc %{_docdir}/gridcraft/ATTRIBUTION.md
 %doc %{_docdir}/gridcraft/README.md
 %{_bindir}/gridcraft
 %{_bindir}/gridcraft-cli
@@ -113,6 +127,9 @@ fi
 %{_datadir}/mime/packages/ai.storyteller.gridcraft.xml
 
 %changelog
+* Wed Oct 28 2026 github-actions[bot] <github-actions[bot]@users.noreply.github.com> - 0.13.0-1
+- update to 0.13.0
+
 * Sun Oct 25 2026 Gustavo Bosmak <gustavo.bosmak@gmail.com> - 0.12.1-1
 - update to 0.12.1
 
