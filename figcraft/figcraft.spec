@@ -5,7 +5,7 @@
 %global __strip /bin/true
 
 Name:           figcraft
-Version:        0.11.2
+Version:        0.12.1
 Release:        1%{?dist}
 Summary:        Open-source interface design and prototyping tool
 License:        MIT OR Apache-2.0
@@ -76,10 +76,18 @@ install -Dm644 payload/usr/share/doc/figcraft/OFL-lato.txt %{buildroot}%{_licens
 install -Dm644 payload/usr/share/doc/figcraft/OFL-liberation-mono.txt %{buildroot}%{_licensedir}/figcraft/OFL-liberation-mono.txt
 install -Dm644 payload/usr/share/doc/figcraft/OFL-liberation-sans.txt %{buildroot}%{_licensedir}/figcraft/OFL-liberation-sans.txt
 install -Dm644 payload/usr/share/doc/figcraft/OFL-liberation-serif.txt %{buildroot}%{_licensedir}/figcraft/OFL-liberation-serif.txt
+install -Dm644 payload/usr/share/doc/figcraft/OFL-lxgw-wenkai-lite.txt %{buildroot}%{_licensedir}/figcraft/OFL-lxgw-wenkai-lite.txt
 install -Dm644 payload/usr/share/doc/figcraft/OFL-merriweather.txt %{buildroot}%{_licensedir}/figcraft/OFL-merriweather.txt
 install -Dm644 payload/usr/share/doc/figcraft/OFL-montserrat.txt %{buildroot}%{_licensedir}/figcraft/OFL-montserrat.txt
+install -Dm644 payload/usr/share/doc/figcraft/OFL-nanum-gothic.txt %{buildroot}%{_licensedir}/figcraft/OFL-nanum-gothic.txt
 install -Dm644 payload/usr/share/doc/figcraft/OFL-noto-sans-arabic.txt %{buildroot}%{_licensedir}/figcraft/OFL-noto-sans-arabic.txt
 install -Dm644 payload/usr/share/doc/figcraft/OFL-noto-sans-cjk-sc.txt %{buildroot}%{_licensedir}/figcraft/OFL-noto-sans-cjk-sc.txt
+install -Dm644 payload/usr/share/doc/figcraft/OFL-noto-sans-devanagari.txt %{buildroot}%{_licensedir}/figcraft/OFL-noto-sans-devanagari.txt
+install -Dm644 payload/usr/share/doc/figcraft/OFL-noto-sans-georgian.txt %{buildroot}%{_licensedir}/figcraft/OFL-noto-sans-georgian.txt
+install -Dm644 payload/usr/share/doc/figcraft/OFL-noto-sans-hebrew.txt %{buildroot}%{_licensedir}/figcraft/OFL-noto-sans-hebrew.txt
+install -Dm644 payload/usr/share/doc/figcraft/OFL-noto-sans-symbols-2.txt %{buildroot}%{_licensedir}/figcraft/OFL-noto-sans-symbols-2.txt
+install -Dm644 payload/usr/share/doc/figcraft/OFL-noto-sans-symbols.txt %{buildroot}%{_licensedir}/figcraft/OFL-noto-sans-symbols.txt
+install -Dm644 payload/usr/share/doc/figcraft/OFL-noto-sans-thai.txt %{buildroot}%{_licensedir}/figcraft/OFL-noto-sans-thai.txt
 install -Dm644 payload/usr/share/doc/figcraft/OFL-nunito-sans.txt %{buildroot}%{_licensedir}/figcraft/OFL-nunito-sans.txt
 install -Dm644 payload/usr/share/doc/figcraft/OFL-open-sans.txt %{buildroot}%{_licensedir}/figcraft/OFL-open-sans.txt
 install -Dm644 payload/usr/share/doc/figcraft/OFL-playfair-display.txt %{buildroot}%{_licensedir}/figcraft/OFL-playfair-display.txt
@@ -139,6 +147,9 @@ fi
 %{_datadir}/mime/packages/ai.storyteller.figcraft.xml
 
 %changelog
+* Wed Oct 28 2026 github-actions[bot] <github-actions[bot]@users.noreply.github.com> - 0.12.1-1
+- update to 0.12.1
+
 * Sun Oct 25 2026 Gustavo Bosmak <gustavo.bosmak@gmail.com> - 0.11.2-1
 - update to 0.11.2
 
