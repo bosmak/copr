@@ -5,7 +5,7 @@
 %global __strip /bin/true
 
 Name:           photocraft
-Version:        0.16.0
+Version:        0.17.0
 Release:        1%{?dist}
 Summary:        Open-source image editor with familiar, professional tools
 License:        MIT OR Apache-2.0
@@ -65,10 +65,22 @@ install -Dm755 payload/usr/bin/photocraft %{buildroot}%{_bindir}/photocraft
 install -Dm755 payload/usr/bin/photocraft-cli %{buildroot}%{_bindir}/photocraft-cli
 install -Dm644 payload/usr/share/applications/ai.storyteller.photocraft.desktop %{buildroot}%{_datadir}/applications/ai.storyteller.photocraft.desktop
 install -Dm644 payload/usr/share/bash-completion/completions/photocraft-cli %{buildroot}%{_datadir}/bash-completion/completions/photocraft-cli
+install -Dm644 payload/usr/share/doc/photocraft/ATTRIBUTION.md %{buildroot}%{_docdir}/photocraft/ATTRIBUTION.md
 install -Dm644 payload/usr/share/doc/photocraft/LICENSE-APACHE %{buildroot}%{_licensedir}/photocraft/LICENSE-APACHE
 install -Dm644 payload/usr/share/doc/photocraft/LICENSE-MIT %{buildroot}%{_licensedir}/photocraft/LICENSE-MIT
+install -Dm644 payload/usr/share/doc/photocraft/NOTICE %{buildroot}%{_licensedir}/photocraft/NOTICE
 install -Dm644 payload/usr/share/doc/photocraft/OFL-biz-ud-mincho.txt %{buildroot}%{_licensedir}/photocraft/OFL-biz-ud-mincho.txt
 install -Dm644 payload/usr/share/doc/photocraft/OFL-biz-ud-pgothic.txt %{buildroot}%{_licensedir}/photocraft/OFL-biz-ud-pgothic.txt
+install -Dm644 payload/usr/share/doc/photocraft/OFL-lxgw-wenkai-lite.txt %{buildroot}%{_licensedir}/photocraft/OFL-lxgw-wenkai-lite.txt
+install -Dm644 payload/usr/share/doc/photocraft/OFL-nanum-gothic.txt %{buildroot}%{_licensedir}/photocraft/OFL-nanum-gothic.txt
+install -Dm644 payload/usr/share/doc/photocraft/OFL-noto-sans-arabic.txt %{buildroot}%{_licensedir}/photocraft/OFL-noto-sans-arabic.txt
+install -Dm644 payload/usr/share/doc/photocraft/OFL-noto-sans-cjk-sc.txt %{buildroot}%{_licensedir}/photocraft/OFL-noto-sans-cjk-sc.txt
+install -Dm644 payload/usr/share/doc/photocraft/OFL-noto-sans-devanagari.txt %{buildroot}%{_licensedir}/photocraft/OFL-noto-sans-devanagari.txt
+install -Dm644 payload/usr/share/doc/photocraft/OFL-noto-sans-georgian.txt %{buildroot}%{_licensedir}/photocraft/OFL-noto-sans-georgian.txt
+install -Dm644 payload/usr/share/doc/photocraft/OFL-noto-sans-hebrew.txt %{buildroot}%{_licensedir}/photocraft/OFL-noto-sans-hebrew.txt
+install -Dm644 payload/usr/share/doc/photocraft/OFL-noto-sans-symbols-2.txt %{buildroot}%{_licensedir}/photocraft/OFL-noto-sans-symbols-2.txt
+install -Dm644 payload/usr/share/doc/photocraft/OFL-noto-sans-symbols.txt %{buildroot}%{_licensedir}/photocraft/OFL-noto-sans-symbols.txt
+install -Dm644 payload/usr/share/doc/photocraft/OFL-noto-sans-thai.txt %{buildroot}%{_licensedir}/photocraft/OFL-noto-sans-thai.txt
 install -Dm644 payload/usr/share/doc/photocraft/OFL-shippori-mincho.txt %{buildroot}%{_licensedir}/photocraft/OFL-shippori-mincho.txt
 install -Dm644 payload/usr/share/doc/photocraft/README.md %{buildroot}%{_docdir}/photocraft/README.md
 install -Dm644 payload/usr/share/fish/vendor_completions.d/photocraft-cli.fish %{buildroot}%{_datadir}/fish/vendor_completions.d/photocraft-cli.fish
@@ -121,7 +133,9 @@ fi
 %files
 %license %{_licensedir}/photocraft/LICENSE-APACHE
 %license %{_licensedir}/photocraft/LICENSE-MIT
+%license %{_licensedir}/photocraft/NOTICE
 %license %{_licensedir}/photocraft/OFL-*
+%doc %{_docdir}/photocraft/ATTRIBUTION.md
 %doc %{_docdir}/photocraft/README.md
 %{_bindir}/photocraft
 %{_bindir}/photocraft-cli
@@ -144,6 +158,9 @@ fi
 %{_datadir}/zsh/site-functions/_photocraft-cli
 
 %changelog
+* Wed Oct 28 2026 github-actions[bot] <github-actions[bot]@users.noreply.github.com> - 0.17.0-1
+- update to 0.17.0
+
 * Sun Oct 25 2026 Gustavo Bosmak <gustavo.bosmak@gmail.com> - 0.16.0-1
 - update to 0.16.0
 
