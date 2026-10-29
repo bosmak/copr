@@ -54,8 +54,10 @@ sudo dnf copr enable bosmak/copr
 sudo dnf install steam-fix-trayicon
 ```
 
-The post-install script enables and starts the user service for every
+The post-transaction script enables and starts the user service for every
 logged-in user and restarts the shell so the change takes effect right away.
+It runs at the end of the transaction, so an upgrade does not leave the
+indicator stopped.
 
 > **This is a systemd *user* service, not a system service.** Always manage it
 > with `systemctl --user` — plain `systemctl` will not find it.

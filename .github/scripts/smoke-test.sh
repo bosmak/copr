@@ -17,7 +17,7 @@ pkgs_dir=${1:-/packages}
 skip_install=${SKIP_INSTALL:-0}
 failed=0
 
-tmpdir=$(mktemp -d)
+tmpdir=$(mktemp -d --tmpdir "copr-smoke-XXXXXX")
 trap 'rm -rf "$tmpdir"' EXIT
 
 ok() { printf '  ok    %s\n' "$*"; }

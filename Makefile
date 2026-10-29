@@ -24,6 +24,19 @@ TOPDIR := $(CURDIR)/$(BUILDDIR)
 else
 TOPDIR := $(BUILDDIR)
 endif
+
+# The scratch space of the builds. The temporary directory of the system
+# is a tmpfs on most systems, so everything written there lives in the
+# memory of the machine. The vendoring of the Rust crates and the
+# unpacking of the sources are big enough to be noticed there, so the
+# scratch space is kept on the disk instead, inside the build directory.
+BUILDTMPDIR ?= $(TOPDIR)/tmp
+export TMPDIR := $(BUILDTMPDIR)
+
+# The temporary directory of the system, where the leftovers of the builds
+# that were interrupted are left behind.
+SYSTEM_TMPDIR ?= /tmp
+
 RPMBUILD ?= rpmbuild
 RPLINT   ?= rpmlint
 
@@ -34,7 +47,8 @@ tool = $(if $(MISE),$(MISE) exec -- $(1),$(shell command -v $(1) 2>/dev/null))
 RUFF        ?= $(call tool,ruff)
 SHELLCHECK  ?= $(call tool,shellcheck)
 YAMLLINT    ?= $(call tool,yamllint)
-SHELL_FILES := .github/scripts/smoke-test.sh .github/scripts/vendor.sh
+SHELL_FILES := .github/scripts/smoke-test.sh .github/scripts/vendor.sh \
+                .github/scripts/build-in-container.sh
 YAML_FILES  := .github/workflows/*.yml .pre-commit-config.yaml .yamllint.yaml
 
 # The container the test target runs in. It needs podman or docker.
@@ -61,6 +75,7 @@ $(1)-srpm:
 	@rm -rf $(TOPDIR)/$(1)/BUILD
 	@rm -f $(TOPDIR)/$(1)/RPMS/x86_64/*.rpm $(TOPDIR)/$(1)/SRPMS/*.src.rpm
 	@mkdir -p $(TOPDIR)/$(1)/{BUILD,RPMS,SOURCES,SPECS,SRPMS}
+	@mkdir -p $(BUILDTMPDIR)
 	@# Drop the sources of a previous version: the checksum file has no
 	@# version in its name, so it has to be fetched again.
 	@version=$$(grep -m1 '^Version:' $(1)/*.spec | awk '{print $$2}'); \
@@ -99,7 +114,7 @@ endef
 
 $(foreach p,$(PKGS),$(eval $(call PACKAGE_RULES,$(p))))
 
-.PHONY: all srpm rpm lint test clean help \
+.PHONY: all srpm rpm lint test clean clean-tmp clean-tmp-stale help \
         $(foreach p,$(PKGS),$(p)-srpm $(p)-rpm $(p)-clean)
 
 all: srpm
@@ -153,6 +168,56 @@ test: rpm
 
 clean:
 	@rm -rf $(BUILDDIR)
+	@$(MAKE) --no-print-directory clean-tmp
+
+# The temporary directory of the system is a tmpfs on most systems: it
+# lives in the memory of the machine, and the builds fill it up. This
+# target removes the leftovers of the builds that were interrupted (the
+# scripts of .github/scripts create their scratch space with mktemp).
+#
+# It only touches the scratch space of this repository, and never the
+# entries that the session needs: the sockets of X11, the ones of the
+# desktop apps and the private directories of systemd live there too.
+clean-tmp:
+	@echo "==> removing the scratch space of the builds ($(BUILDTMPDIR))"
+	@rm -rf $(BUILDTMPDIR)
+	@# The leftovers of the interrupted builds are the temporary
+	@# directories of the scripts of this repository. They are named
+	@# after them, so only those are removed.
+	@echo "==> removing the leftovers of the builds in $(SYSTEM_TMPDIR)"
+	@for prefix in copr-vendor copr-smoke; do \
+		for dir in $(SYSTEM_TMPDIR)/$$prefix*; do \
+			[ -e "$$dir" ] || continue; \
+			chmod -R u+w "$$dir" 2>/dev/null || :; \
+			rm -rf "$$dir" 2>/dev/null || :; \
+		done; \
+	done
+	@echo "==> $(SYSTEM_TMPDIR) now holds $$(du -sh $(SYSTEM_TMPDIR) 2>/dev/null | cut -f1)"
+
+# The same, plus the generic leftovers of the other tools: the temporary
+# directories of mktemp that nobody cleaned up. They are only removed
+# when they are old (TMP_STALE_MINUTES), not a mount point and not open
+# by any process, so the scratch space of the running programs is safe.
+#
+# This one is not part of "make clean": it removes things that do not
+# belong to this repository, so it has to be asked for explicitly.
+#
+#   make clean-tmp-stale
+#   make clean-tmp-stale TMP_STALE_MINUTES=60
+TMP_STALE_MINUTES ?= 1440
+
+clean-tmp-stale:
+	@$(MAKE) --no-print-directory clean-tmp
+	@echo "==> removing the stale temporary directories of $(SYSTEM_TMPDIR)"
+	@for dir in $(SYSTEM_TMPDIR)/tmp.*; do \
+		[ -d "$$dir" ] || continue; \
+		mountpoint -q "$$dir" 2>/dev/null && continue; \
+		[ -n "$$(find "$$dir" -xdev -mmin -$(TMP_STALE_MINUTES) 2>/dev/null | head -1)" ] && continue; \
+		command -v lsof >/dev/null 2>&1 && \
+			[ -n "$$(lsof +D "$$dir" 2>/dev/null | head -1)" ] && continue; \
+		rm -rf "$$dir"; \
+	done
+	@echo "==> $(SYSTEM_TMPDIR) now holds $$(du -sh $(SYSTEM_TMPDIR) 2>/dev/null | cut -f1)"
 
 help:
 	@echo "Targets:"
@@ -161,6 +226,8 @@ help:
 	@echo "  lint         run rpmlint on every spec"
 	@echo "  test         build the RPMs and check them in a $(TEST_IMAGE) container"
 	@echo "  clean        remove $(BUILDDIR)/"
+	@echo "  clean-tmp    remove the scratch space and the leftovers of the builds"
+	@echo "  clean-tmp-stale  also remove the stale temporary directories of the system"
 	@echo "  <pkg>-srpm   build one package: $(PKGS)"
 	@echo "  <pkg>-rpm    build one package's binary RPMs"
 	@echo "  <pkg>-clean  remove $(TOPDIR)/<pkg>"

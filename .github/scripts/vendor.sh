@@ -67,7 +67,7 @@ if [ ! -f "$src0_file" ]; then
     curl -fsSL "$src0" -o "$src0_file"
 fi
 
-work=$(mktemp -d)
+work=$(mktemp -d --tmpdir "copr-vendor-XXXXXX")
 trap 'rm -rf "$work"' EXIT
 
 tar -xf "$src0_file" -C "$work" --strip-components=1

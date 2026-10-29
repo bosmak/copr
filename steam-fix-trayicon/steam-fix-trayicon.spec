@@ -2,7 +2,7 @@
 
 Name:           steam-fix-trayicon
 Version:        0.1.0
-Release:        2%{?dist}
+Release:        3%{?dist}
 Summary:        Replacement Steam tray icon: double click opens the Steam window
 License:        MIT
 URL:            https://github.com/bosmak/copr/tree/main/steam-fix-trayicon
@@ -18,6 +18,10 @@ BuildRequires:  systemd-rpm-macros
 Requires:       python3-dbus
 Requires:       python3-gobject
 Requires:       systemd
+# The scriptlets of the package use runuser (from util-linux) to reach the
+# user manager of the logged in users. systemd only requires util-linux-core,
+# which does not ship runuser, so util-linux is needed explicitly.
+Requires:       util-linux
 
 # quickshell provides the tray IPC that the shell (DankMaterialShell) exposes
 # to render the menu on a single click.  Without it the icon still shows and
@@ -68,11 +72,25 @@ install -Dm644 %{SOURCE3} %{buildroot}%{_licensedir}/steam-fix-trayicon/LICENSE
 # Standard user-unit handling for the invoking user.
 %systemd_user_post steam-fix-trayicon.service
 
-# The scriptlets above run as root, so they cannot reach the user manager of
-# the person who is actually logged in.  Enable and start the service for
-# every user that currently has a session, then restart the shell so the
+%posttrans
+# This runs at the very end of the transaction, after the pre-uninstall and
+# post-uninstall scriptlets of the package we are replacing.  Those old
+# scriptlets stop and disable the user service, so this is where the service
+# has to be enabled and started again - doing it in the post scriptlet was
+# not enough, the next `dnf update` killed the icon again.
+#
+# The scriptlets run as root, so they cannot reach the user manager of the
+# person who is actually logged in.  Enable and start the service for every
+# user that currently has a session, then restart the shell so the
 # DMS drop-in (which hides Valve's original icon) takes effect.
+enabled_user=''
+
 for uid in $(loginctl list-users --no-legend 2>/dev/null | awk '{print $1}'); do
+    # Skip uid 0 on purpose: while `sudo dnf` runs, the root user has a
+    # session of its own (created by pam_systemd), and the indicator would
+    # be started in root's user manager, where the shell's
+    # StatusNotifierWatcher does not exist.
+    [ "$uid" -ne 0 ] || continue
     user=$(getent passwd "$uid" | cut -d: -f1)
     [ -n "$user" ] || continue
     runtime=$(loginctl show-user "$uid" --property=RuntimePath --value 2>/dev/null)
@@ -83,11 +101,15 @@ for uid in $(loginctl list-users --no-legend 2>/dev/null | awk '{print $1}'); do
     runuser -u "$user" -- env XDG_RUNTIME_DIR="$runtime" \
         DBUS_SESSION_BUS_ADDRESS="unix:path=$runtime/bus" \
         systemctl --user try-restart dms.service >/dev/null 2>&1 || :
+    if runuser -u "$user" -- env XDG_RUNTIME_DIR="$runtime" \
+        DBUS_SESSION_BUS_ADDRESS="unix:path=$runtime/bus" \
+        systemctl --user is-enabled steam-fix-trayicon.service >/dev/null 2>&1; then
+        enabled_user="$user"
+    fi
 done
 
-if [ -n "${XDG_RUNTIME_DIR:-}" ] && [ -x /usr/bin/systemctl ] \
-   && /usr/bin/systemctl --user is-enabled steam-fix-trayicon.service >/dev/null 2>&1; then
-    status='enabled — running now'
+if [ -n "$enabled_user" ]; then
+    status="enabled — running now (user $enabled_user)"
 else
     status='NOT enabled yet (no active user session; run the commands below)'
 fi
@@ -126,15 +148,22 @@ EOF
 %systemd_user_preun steam-fix-trayicon.service
 
 # Stop and disable the service for the users that have it enabled.
-for uid in $(loginctl list-users --no-legend 2>/dev/null | awk '{print $1}'); do
-    user=$(getent passwd "$uid" | cut -d: -f1)
-    [ -n "$user" ] || continue
-    runtime=$(loginctl show-user "$uid" --property=RuntimePath --value 2>/dev/null)
-    [ -n "$runtime" ] && [ -d "$runtime" ] || continue
-    runuser -u "$user" -- env XDG_RUNTIME_DIR="$runtime" \
-        DBUS_SESSION_BUS_ADDRESS="unix:path=$runtime/bus" \
-        systemctl --user disable --now steam-fix-trayicon.service >/dev/null 2>&1 || :
-done
+# $1 is the number of copies of this package that stay installed: it is 1
+# during an upgrade and 0 when the package is really removed.  Only a real
+# removal may stop the service - during an upgrade this used to kill the
+# icon that the post-transaction scriptlet had just started.
+if [ "$1" -eq 0 ]; then
+    for uid in $(loginctl list-users --no-legend 2>/dev/null | awk '{print $1}'); do
+        [ "$uid" -ne 0 ] || continue
+        user=$(getent passwd "$uid" | cut -d: -f1)
+        [ -n "$user" ] || continue
+        runtime=$(loginctl show-user "$uid" --property=RuntimePath --value 2>/dev/null)
+        [ -n "$runtime" ] && [ -d "$runtime" ] || continue
+        runuser -u "$user" -- env XDG_RUNTIME_DIR="$runtime" \
+            DBUS_SESSION_BUS_ADDRESS="unix:path=$runtime/bus" \
+            systemctl --user disable --now steam-fix-trayicon.service >/dev/null 2>&1 || :
+    done
+fi
 
 %postun
 %systemd_user_postun steam-fix-trayicon.service
@@ -146,6 +175,14 @@ done
 %{_userunitdir}/dms.service.d/99-steam-fix-trayicon.conf
 
 %changelog
+* Wed Oct 28 2026 Gustavo Bosmak <gustavo.bosmak@gmail.com> - 0.1.0-3
+- keep the indicator alive across package upgrades: enable and start it from
+  the post-transaction scriptlet (the last one of the transaction) and only
+  stop it when the package is really removed
+- skip uid 0 in the scriptlet loops: during `sudo dnf` the root user has a
+  session, and the indicator was started in root's user manager, where the
+  shell's StatusNotifierWatcher does not exist
+
 * Sat Oct 24 2026 Gustavo Bosmak <gustavo.bosmak@gmail.com> - 0.1.0-2
 - document that this is made for DuxShell (formerly DankMaterialShell) and
   only tested on niri

@@ -5,7 +5,7 @@
 
 Name:           clip-bridge
 Version:        0.1.9
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Sync your X11 and Wayland clipboard seamlessly
 License:        MIT
 URL:            https://github.com/noctisynth/clip-bridge
@@ -43,7 +43,7 @@ X11, paste into Wayland; copy from Wayland, paste into X11.
 
 %install
 install -Dm755 clip-bridge %{buildroot}%{_bindir}/clip-bridge
-install -Dm644 %{SOURCE1} %{buildroot}/usr/lib/systemd/user/clip-bridge.service
+install -Dm644 %{SOURCE1} %{buildroot}%{_userunitdir}/clip-bridge.service
 install -Dm644 LICENSE %{buildroot}%{_licensedir}/clip-bridge/LICENSE
 
 %post
@@ -96,8 +96,12 @@ EOF
 %files
 %license %{_licensedir}/clip-bridge/LICENSE
 %{_bindir}/clip-bridge
-/usr/lib/systemd/user/clip-bridge.service
+%{_userunitdir}/clip-bridge.service
 
 %changelog
+* Wed Oct 28 2026 Gustavo Bosmak <gustavo.bosmak@gmail.com> - 0.1.9-2
+- install the systemd user unit with the systemd user unit macro instead of
+  the hardcoded path
+
 * Thu Oct 16 2025 Gustavo Bosmak <gustavo.bosmak@gmail.com> - 0.1.9-1
 - initial COPR package
