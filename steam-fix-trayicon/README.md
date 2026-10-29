@@ -32,6 +32,21 @@ The menu is proxied from Steam's own dbusmenu, so the recently played games
 list is always current. The icon, tooltip and attention state are mirrored
 from Steam's real indicator.
 
+## The icon follows Steam
+
+The replacement icon is only in the tray **while the Steam client runs**.
+It is registered with the panel's `StatusNotifierWatcher` when Steam starts
+and it is taken out of the tray again when Steam exits — the same lifetime
+the original Steam indicator has.
+
+The watcher spec has no "unregister" call, so the icon is registered under
+a well-known bus name of its own (`org.kde.StatusNotifierItem-steam-window`)
+instead of the connection's unique name. Releasing that name makes the
+watcher drop the item, which makes the panel remove the icon; taking the
+name again and registering the item brings the icon back.
+
+While Steam is not running there is no Steam icon in the tray at all.
+
 ## Compatibility
 
 Built and tested against:
@@ -89,6 +104,9 @@ Environment=STEAM_TRAY_WINDOW_URL=steam://open/main
 ```
 
 Then `systemctl --user restart steam-fix-trayicon.service`.
+
+The service polls every two seconds for the Steam client, so the icon
+appears shortly after Steam starts and disappears shortly after it exits.
 
 ## Uninstall / revert
 

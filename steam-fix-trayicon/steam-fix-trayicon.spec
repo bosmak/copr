@@ -1,8 +1,8 @@
 %global debug_package %{nil}
 
 Name:           steam-fix-trayicon
-Version:        0.1.0
-Release:        3%{?dist}
+Version:        0.2.0
+Release:        1%{?dist}
 Summary:        Replacement Steam tray icon: double click opens the Steam window
 License:        MIT
 URL:            https://github.com/bosmak/copr/tree/main/steam-fix-trayicon
@@ -47,6 +47,9 @@ request: https://github.com/ValveSoftware/steam-for-linux/issues/3519
 This package installs a small StatusNotifierItem that mirrors Steam's icon,
 tooltip and menu, plus a systemd user service that keeps it running and
 re-registers it with the panel whenever the shell restarts.
+
+The icon follows Steam: it is only in the tray while the Steam client runs
+and it is taken out of the tray again when the client exits.
 
 This package is developed against DuxShell (formerly DankMaterialShell / DMS)
 and has only been tested on niri.  DuxShell can run on other Wayland
@@ -175,6 +178,16 @@ fi
 %{_userunitdir}/dms.service.d/99-steam-fix-trayicon.conf
 
 %changelog
+* Wed Oct 28 2026 Gustavo Bosmak <gustavo.bosmak@gmail.com> - 0.2.0-1
+- the icon now follows Steam: it is only in the tray while the Steam
+  client runs and it is taken out of the tray again when the client exits.
+  The item is registered under a well-known bus name of our own, and
+  releasing that name makes the panel drop the item (the watcher spec has
+  no "unregister" call)
+- detect the Steam client by its process instead of just its web helpers,
+  so the icon goes away when the client exits
+- reap the processes the script starts, so they do not linger as zombies
+
 * Wed Oct 28 2026 Gustavo Bosmak <gustavo.bosmak@gmail.com> - 0.1.0-3
 - keep the indicator alive across package upgrades: enable and start it from
   the post-transaction scriptlet (the last one of the transaction) and only

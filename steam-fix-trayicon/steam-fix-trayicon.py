@@ -9,6 +9,9 @@ Steam's Linux tray icon is a libappindicator item, so the panel always
 answers a click with Steam's popup menu and the window can never be opened
 from the tray - https://github.com/ValveSoftware/steam-for-linux/issues/3519
 
+The icon follows Steam: it is registered with the panel's watcher while the
+Steam client runs and taken out of the tray when the client exits.
+
 See the package README for the full story.  Requires python3 + python3-dbus.
 """
 
@@ -28,10 +31,20 @@ dbus.mainloop.glib.DBusGMainLoop(set_as_default=True)
 SNI_IFACE = "org.kde.StatusNotifierItem"
 MENU_IFACE = "com.canonical.dbusmenu"
 PROPS_IFACE = "org.freedesktop.DBus.Properties"
+WATCHER_IFACE = "org.kde.StatusNotifierWatcher"
+
+WATCHER_NAME = "org.kde.StatusNotifierWatcher"
+WATCHER_PATH = "/StatusNotifierWatcher"
 
 ITEM_PATH = "/StatusNotifierItem"
 MENU_PATH = "/MenuBar"
+# The bus name the indicator is registered under.  It is a well-known name
+# of our own (and not the unique name of the connection) because the
+# watcher spec has no "unregister" method: an item is dropped when the bus
+# name it was registered under disappears.  Releasing this name is what
+# takes the icon out of the tray.
 BUS_NAME = "org.kde.StatusNotifierItem-steam-window"
+QUALIFIED_ITEM = BUS_NAME + ITEM_PATH
 
 CFG = {
     # Two Activate() calls closer together than this count as a double click.
@@ -49,6 +62,9 @@ CFG = {
     "item_id": os.environ.get("STEAM_TRAY_ITEM_ID", "steam-window"),
 }
 
+# The processes we started, so they can be reaped when they are done.
+SPAWNED = []
+
 # Fallback menu, used while Steam is not running.
 FALLBACK_ITEMS = [
     (1, "Open Steam", ["steam://open/main"]),
@@ -64,18 +80,54 @@ def log(msg):
     print(f"[steam-fix-trayicon] {msg}", file=sys.stderr, flush=True)
 
 
+def proc_comm(pid):
+    """The command name of a process, read from /proc."""
+    try:
+        with open(f"/proc/{pid}/comm") as fh:
+            return fh.read().strip()
+    except OSError:
+        return None
+
+
+def proc_state(pid):
+    """The state of a process ("R", "S", "Z", ...) read from /proc."""
+    try:
+        with open(f"/proc/{pid}/stat") as fh:
+            data = fh.read()
+    except OSError:
+        return None
+    # The comm field may contain spaces and parentheses, so the fields
+    # after the last closing parenthesis are the reliable ones.
+    try:
+        return data[data.rindex(")") + 1 :].split()[0]
+    except (ValueError, IndexError):
+        return None
+
+
 def steam_running():
+    """Whether the Steam client is running.
+
+    The client is the process named "steam" - the launcher script and the
+    web helpers have their own names.  Zombies are ignored: a Steam that
+    was started here and that exited without being reaped would keep the
+    icon around forever.
+    """
     for pid in os.listdir("/proc"):
         if not pid.isdigit():
             continue
-        try:
-            with open(f"/proc/{pid}/comm") as fh:
-                name = fh.read().strip()
-        except OSError:
+        if proc_comm(pid) != "steam":
             continue
-        if name in ("steam", "steamwebhelper"):
-            return True
+        if proc_state(pid) == "Z":
+            continue
+        return True
     return False
+
+
+def reap_children():
+    """Reap the processes we started, so they do not linger as zombies."""
+    for proc in list(SPAWNED):
+        if proc.poll() is not None:
+            SPAWNED.remove(proc)
 
 
 def launch(args):
@@ -83,7 +135,7 @@ def launch(args):
     cmd = [CFG["steam_bin"]] + list(args)
     log(f"launching: {' '.join(cmd)}")
     try:
-        subprocess.Popen(
+        proc = subprocess.Popen(
             cmd,
             stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL,
@@ -92,6 +144,8 @@ def launch(args):
         )
     except OSError as exc:
         log(f"failed to launch {cmd[0]}: {exc}")
+        return
+    SPAWNED.append(proc)
 
 
 def dms_instances():
@@ -471,26 +525,31 @@ class SteamMirror:
         self.steam_service = None
         self.steam_path = None
 
-    def find_steam_item(self):
-        try:
-            watcher = self.bus.get_object(
-                "org.kde.StatusNotifierWatcher", "/StatusNotifierWatcher"
-            )
-            watcher_props = dbus.Interface(watcher, PROPS_IFACE)
-            watcher_props.Get(
-                "org.kde.StatusNotifierWatcher",
-                "RegisteredStatusNotifierItems",
-                reply_handler=lambda items: self._check_items(items),
-                error_handler=lambda e: log(f"watcher error: {e}"),
-            )
-        except dbus.DBusException as exc:
-            log(f"could not query watcher: {exc}")
+    @property
+    def steam_address(self):
+        """The address of Steam's indicator, as the watcher spells it."""
+        if not self.steam_service or not self.steam_path:
+            return None
+        return self.steam_service + self.steam_path
 
-    def _check_items(self, items):
+    def reset(self):
+        """Forget Steam's indicator (it is gone)."""
+        if self.steam_service is None:
+            return
+        log("forgetting Steam's indicator")
+        self.steam_service = None
+        self.steam_path = None
+        self.item._menu.set_remote(None, None)
+
+    def find_steam_item(self, items):
+        """Pick Steam's own indicator out of the watcher's item list."""
         for entry in items:
             service, _, path = str(entry).partition("/")
             if not path.startswith("/"):
                 path = "/" + path
+            if service == BUS_NAME:
+                # That is us.
+                continue
             try:
                 obj = self.bus.get_object(service, path)
                 item_props = dbus.Interface(obj, PROPS_IFACE)
@@ -572,53 +631,119 @@ class SteamMirror:
         )
 
 
-def sync_with_watcher(bus, item, mirror):
-    """Make sure we stay registered.
+class TrayPresence:
+    """Controls whether our icon is in the panel's tray.
 
-    The panel's StatusNotifierWatcher belongs to the shell process, so it
-    disappears (and forgets us) whenever the shell restarts.  Re-register
-    whenever we are missing from its item list.
+    The watcher spec has no "unregister" call: the watcher drops an item
+    when the bus name it was registered under disappears.  So the item is
+    registered under a well-known name of our own - releasing that name
+    makes the panel drop the icon, and taking the name again brings the
+    icon back.
     """
-    try:
-        watcher = bus.get_object(
-            "org.kde.StatusNotifierWatcher", "/StatusNotifierWatcher"
+
+    def __init__(self, bus):
+        self.bus = bus
+        # Do we own the bus name the item is registered under?
+        self.owned = False
+        # Have we already complained about not getting the name?
+        self.complained = False
+
+    def _watcher(self):
+        return dbus.Interface(
+            self.bus.get_object(WATCHER_NAME, WATCHER_PATH), WATCHER_IFACE
         )
-        watcher_props = dbus.Interface(watcher, PROPS_IFACE)
-        items = [
-            str(i)
-            for i in watcher_props.Get(
-                "org.kde.StatusNotifierWatcher", "RegisteredStatusNotifierItems"
+
+    def items(self):
+        """The items the panel's watcher knows about (None if it is gone)."""
+        try:
+            props = dbus.Interface(
+                self.bus.get_object(WATCHER_NAME, WATCHER_PATH), PROPS_IFACE
             )
-        ]
-        if bus.get_unique_name() + ITEM_PATH not in items:
-            watcher.RegisterStatusNotifierItem(ITEM_PATH)
-            log("registered with StatusNotifierWatcher")
-    except dbus.DBusException as exc:
-        log(f"watcher unavailable ({exc}), will retry")
-    mirror.find_steam_item()
-    return True
+            return [
+                str(i)
+                for i in props.Get(WATCHER_IFACE, "RegisteredStatusNotifierItems")
+            ]
+        except dbus.DBusException as exc:
+            log(f"watcher unavailable ({exc}), will retry")
+            return None
+
+    def acquire(self):
+        """Take the bus name the item is registered under."""
+        if self.owned:
+            return True
+        reply = self.bus.request_name(BUS_NAME, dbus.bus.NAME_FLAG_DO_NOT_QUEUE)
+        if reply not in (
+            dbus.bus.REQUEST_NAME_REPLY_PRIMARY_OWNER,
+            dbus.bus.REQUEST_NAME_REPLY_ALREADY_OWNER,
+        ):
+            if not self.complained:
+                log(f"could not own {BUS_NAME} (reply {reply})")
+                self.complained = True
+            return False
+        self.owned = True
+        self.complained = False
+        return True
+
+    def release(self):
+        """Give the bus name up: the watcher drops the item with it."""
+        if not self.owned:
+            return
+        self.bus.release_name(BUS_NAME)
+        self.owned = False
+
+    def register(self):
+        """Ask the watcher to show our item."""
+        try:
+            self._watcher().RegisterStatusNotifierItem(BUS_NAME)
+            log("registered with the StatusNotifierWatcher")
+        except dbus.DBusException as exc:
+            log(f"could not register with the watcher: {exc}")
 
 
-def poll_steam_state(item):
-    """Keep Status in sync with whether Steam is running."""
-    running = steam_running()
+def sync_tray(item, mirror, presence):
+    """Keep the tray in sync with the Steam client.
+
+    The icon is only in the tray while Steam runs: it is registered with
+    the panel's watcher when Steam comes up and taken out of it again when
+    Steam goes away.
+    """
+    reap_children()
+
+    items = presence.items()
+    listed = items is not None and QUALIFIED_ITEM in items
+
+    # Steam's own indicator is the most reliable sign that Steam is up.
+    steam_gone = (
+        mirror.steam_address and items is not None and mirror.steam_address not in items
+    )
+    if steam_gone:
+        mirror.reset()
+
+    running = steam_running() or mirror.steam_service is not None
+
+    if not running and presence.owned:
+        log("Steam is gone, taking the icon out of the tray")
+        presence.release()
+    elif running and items is not None and not listed and presence.acquire():
+        # The watcher does not know us: either we are just coming back from
+        # Steam being closed, or the shell restarted and lost our item.
+        presence.register()
+
+    if items is not None:
+        mirror.find_steam_item(items)
+
     item.set_state(status="Active" if running else "Passive")
     return True
 
 
 def main():
     bus = dbus.SessionBus()
-    try:
-        dbus.service.BusName(BUS_NAME, bus)
-    except dbus.DBusException as exc:
-        log(f"could not own bus name: {exc}")
 
     item = SteamTrayItem(bus)
-    item.set_state(status="Active" if steam_running() else "Passive")
-
     mirror = SteamMirror(bus, item)
-    GLib.timeout_add_seconds(5, lambda: poll_steam_state(item))
-    GLib.timeout_add_seconds(3, lambda: sync_with_watcher(bus, item, mirror))
+    presence = TrayPresence(bus)
+
+    GLib.timeout_add_seconds(2, lambda: sync_tray(item, mirror, presence))
 
     log("running")
     loop = GLib.MainLoop()
