@@ -5,7 +5,7 @@
 %global __strip /bin/true
 
 Name:           artcraft-launcher
-Version:        0.9.0
+Version:        0.10.0
 Release:        1%{?dist}
 Summary:        Install, update and launch the Craft App Suite
 License:        MIT OR Apache-2.0
@@ -21,6 +21,7 @@ Source1:        https://github.com/storytold/craft-launcher/releases/download/v%
 # The GUI stack (winit/xkbcommon) is dlopen()ed at runtime, so rpm's
 # automatic ELF dependency detection does not see it. Upstream's own RPM
 # requires these explicitly, so we do the same.
+Requires:       glibc >= 2.35
 Requires:       libxkbcommon
 Requires:       libxkbcommon-x11
 Requires:       libwayland-client
@@ -122,6 +123,9 @@ fi
 %{_datadir}/metainfo/ai.storyteller.artcraft-launcher.metainfo.xml
 
 %changelog
+* Fri Oct 30 2026 github-actions[bot] <github-actions[bot]@users.noreply.github.com> - 0.10.0-1
+- update to 0.10.0
+
 * Wed Oct 28 2026 github-actions[bot] <github-actions[bot]@users.noreply.github.com> - 0.9.0-1
 - update to 0.9.0
 
