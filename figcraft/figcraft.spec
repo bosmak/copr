@@ -5,7 +5,7 @@
 %global __strip /bin/true
 
 Name:           figcraft
-Version:        0.12.1
+Version:        0.13.1
 Release:        1%{?dist}
 Summary:        Open-source interface design and prototyping tool
 License:        MIT OR Apache-2.0
@@ -147,6 +147,9 @@ fi
 %{_datadir}/mime/packages/ai.storyteller.figcraft.xml
 
 %changelog
+* Sat Oct 31 2026 github-actions[bot] <github-actions[bot]@users.noreply.github.com> - 0.13.1-1
+- update to 0.13.1
+
 * Wed Oct 28 2026 github-actions[bot] <github-actions[bot]@users.noreply.github.com> - 0.12.1-1
 - update to 0.12.1
 
