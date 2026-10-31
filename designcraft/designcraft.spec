@@ -5,7 +5,7 @@
 %global __strip /bin/true
 
 Name:           designcraft
-Version:        0.14.0
+Version:        0.15.2
 Release:        1%{?dist}
 Summary:        Open-source page layout and publishing app
 License:        MIT OR Apache-2.0
@@ -125,6 +125,9 @@ fi
 %{_datadir}/mime/packages/ai.storyteller.designcraft.xml
 
 %changelog
+* Sat Oct 31 2026 github-actions[bot] <github-actions[bot]@users.noreply.github.com> - 0.15.2-1
+- update to 0.15.2
+
 * Wed Oct 28 2026 github-actions[bot] <github-actions[bot]@users.noreply.github.com> - 0.14.0-1
 - update to 0.14.0
 
