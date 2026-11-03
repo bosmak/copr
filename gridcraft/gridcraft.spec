@@ -5,7 +5,7 @@
 %global __strip /bin/true
 
 Name:           gridcraft
-Version:        0.15.0
+Version:        0.16.0
 Release:        1%{?dist}
 Summary:        Open-source spreadsheet that works the way Excel users expect
 License:        MIT OR Apache-2.0
@@ -127,6 +127,9 @@ fi
 %{_datadir}/mime/packages/ai.storyteller.gridcraft.xml
 
 %changelog
+* Tue Nov 03 2026 github-actions[bot] <github-actions[bot]@users.noreply.github.com> - 0.16.0-1
+- update to 0.16.0
+
 * Mon Nov 02 2026 github-actions[bot] <github-actions[bot]@users.noreply.github.com> - 0.15.0-1
 - update to 0.15.0
 
