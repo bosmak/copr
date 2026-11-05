@@ -5,7 +5,7 @@
 %global __strip /bin/true
 
 Name:           cadcraft
-Version:        0.17.0
+Version:        0.17.1
 Release:        1%{?dist}
 Summary:        Open-source computer-aided design and drafting app
 License:        MIT OR Apache-2.0
@@ -90,6 +90,7 @@ install -Dm644 payload/usr/share/man/man1/cadcraft-cli-convert.1 %{buildroot}%{_
 install -Dm644 payload/usr/share/man/man1/cadcraft-cli-info.1 %{buildroot}%{_mandir}/man1/cadcraft-cli-info.1
 install -Dm644 payload/usr/share/man/man1/cadcraft-cli-mcp.1 %{buildroot}%{_mandir}/man1/cadcraft-cli-mcp.1
 install -Dm644 payload/usr/share/man/man1/cadcraft-cli-perf.1 %{buildroot}%{_mandir}/man1/cadcraft-cli-perf.1
+install -Dm644 payload/usr/share/man/man1/cadcraft-cli-roundtrip.1 %{buildroot}%{_mandir}/man1/cadcraft-cli-roundtrip.1
 install -Dm644 payload/usr/share/man/man1/cadcraft-cli-run.1 %{buildroot}%{_mandir}/man1/cadcraft-cli-run.1
 install -Dm644 payload/usr/share/man/man1/cadcraft-cli-sample.1 %{buildroot}%{_mandir}/man1/cadcraft-cli-sample.1
 install -Dm644 payload/usr/share/man/man1/cadcraft-cli.1 %{buildroot}%{_mandir}/man1/cadcraft-cli.1
@@ -139,6 +140,7 @@ fi
 %{_mandir}/man1/cadcraft-cli-info.1*
 %{_mandir}/man1/cadcraft-cli-mcp.1*
 %{_mandir}/man1/cadcraft-cli-perf.1*
+%{_mandir}/man1/cadcraft-cli-roundtrip.1*
 %{_mandir}/man1/cadcraft-cli-run.1*
 %{_mandir}/man1/cadcraft-cli-sample.1*
 %{_mandir}/man1/cadcraft-cli.1*
@@ -147,6 +149,9 @@ fi
 %{_datadir}/zsh/site-functions/_cadcraft-cli
 
 %changelog
+* Thu Nov 05 2026 github-actions[bot] <github-actions[bot]@users.noreply.github.com> - 0.17.1-1
+- update to 0.17.1
+
 * Tue Nov 03 2026 github-actions[bot] <github-actions[bot]@users.noreply.github.com> - 0.17.0-1
 - update to 0.17.0
 
