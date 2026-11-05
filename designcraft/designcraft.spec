@@ -5,7 +5,7 @@
 %global __strip /bin/true
 
 Name:           designcraft
-Version:        0.17.0
+Version:        0.17.2
 Release:        1%{?dist}
 Summary:        Open-source page layout and publishing app
 License:        MIT OR Apache-2.0
@@ -22,6 +22,7 @@ Source1:        https://github.com/storytold/designcraft/releases/download/v%{ve
 # automatic ELF dependency detection does not see it. Upstream's own RPM
 # requires these explicitly, so we do the same.
 Requires:       libxkbcommon
+Requires:       libxkbcommon-x11
 Requires:       (vulkan-loader or mesa-libEGL)
 
 # Upstream only publishes x86_64 Linux builds.
@@ -125,6 +126,9 @@ fi
 %{_datadir}/mime/packages/ai.storyteller.designcraft.xml
 
 %changelog
+* Thu Nov 05 2026 github-actions[bot] <github-actions[bot]@users.noreply.github.com> - 0.17.2-1
+- update to 0.17.2
+
 * Tue Nov 03 2026 github-actions[bot] <github-actions[bot]@users.noreply.github.com> - 0.17.0-1
 - update to 0.17.0
 
