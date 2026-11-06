@@ -18,6 +18,7 @@ My [Fedora COPR packages](https://copr.fedorainfracloud.org/coprs/bosmak/copr/).
 - [filmcraft](filmcraft/) — non-linear video editor
 - [gridcraft](gridcraft/) — spreadsheet (Excel-like)
 - [lightcraft](lightcraft/) — photo library and raw developer
+- [orca-slicer](orca-slicer/) — 3D printing slicer
 - [pdfcraft](pdfcraft/) — PDF reader and editor
 - [photocraft](photocraft/) — image editor (Photoshop-like)
 - [soundcraft](soundcraft/) — digital audio workstation (Pro Tools-like)

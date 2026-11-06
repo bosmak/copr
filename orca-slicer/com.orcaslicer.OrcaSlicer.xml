@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- The file types of the models that OrcaSlicer opens. The STL and the
+     3MF ones are already known by shared-mime-info, the OBJ and the AMF
+     ones are not. -->
+<mime-info xmlns="http://www.freedesktop.org/standards/shared-mime-info">
+  <mime-type type="application/prs.wavefront-obj">
+    <comment>Wavefront OBJ</comment>
+    <glob pattern="*.obj"/>
+  </mime-type>
+  <mime-type type="application/x-amf">
+    <comment>AMF mesh format</comment>
+    <glob pattern="*.amf"/>
+  </mime-type>
+</mime-info>

@@ -1,0 +1,13 @@
+[Desktop Entry]
+Name=OrcaSlicer
+GenericName=3D Printer Slicer
+Comment=Turn 3D models into the G-code of a 3D printer
+Exec=orca-slicer %F
+TryExec=orca-slicer
+Icon=OrcaSlicer
+Type=Application
+Categories=Graphics;3DGraphics;
+MimeType=model/stl;model/3mf;application/prs.wavefront-obj;application/x-amf;
+Terminal=false
+StartupNotify=true
+PrefersNonDefaultGPU=true

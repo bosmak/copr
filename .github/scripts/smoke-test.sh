@@ -158,6 +158,11 @@ for rpm_file in "$pkgs_dir"/*.rpm; do
         steam-fix-trayicon)
             run python3 -m py_compile /usr/bin/steam-fix-trayicon
             ;;
+        orca-slicer)
+            # It needs a display to do its job, but it can print its
+            # usage without one.
+            run orca-slicer --help
+            ;;
         *)
             run "$name-cli" --version
             ;;

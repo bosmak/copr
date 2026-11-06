@@ -127,6 +127,18 @@ sudo dnf install lightcraft
 
 Upstream: <https://github.com/storytold/lightcraft>
 
+### orca-slicer
+
+[![License: AGPL-3.0-only](https://img.shields.io/badge/License-AGPL--3.0--only-blue.svg)](https://github.com/OrcaSlicer/OrcaSlicer/blob/master/LICENSE.txt)
+
+Advanced 3D printing slicer: turns the models of a printer into the G-code that the printer runs.
+
+```sh
+sudo dnf install orca-slicer
+```
+
+Upstream: <https://github.com/OrcaSlicer/OrcaSlicer>
+
 ### pdfcraft
 
 [![License: MIT OR Apache-2.0](https://img.shields.io/badge/License-MIT%20OR%20Apache--2.0-blue.svg)](https://github.com/storytold/pdfcraft/blob/main/LICENSE)

@@ -1,0 +1,36 @@
+#!/bin/sh
+# Launcher of OrcaSlicer.
+#
+# The application is installed in a private directory: it looks for its
+# data in the "resources" directory that sits next to the "bin"
+# directory holding the binary. The launcher keeps that layout working
+# and adds the workaround of upstream's AppRun for the Wayland sessions
+# with a recent NVIDIA driver.
+
+# On a Wayland session with an NVIDIA driver newer than 555, the
+# application crashes at startup when it renders with the native GL
+# driver: the workaround is to render through Mesa's Zink instead.
+if [ "$XDG_SESSION_TYPE" = "wayland" ] && [ "$ZINK_DISABLE_OVERRIDE" != "1" ] &&
+   command -v glxinfo >/dev/null 2>&1; then
+    renderer=$(glxinfo 2>/dev/null | sed -n 's/^OpenGL renderer string: //p' | head -n 1)
+    case "$renderer" in
+        *NVIDIA*)
+            if command -v nvidia-smi >/dev/null 2>&1; then
+                driver=$(nvidia-smi --query-gpu=driver_version --format=csv,noheader 2>/dev/null | head -n 1)
+                major=${driver%%.*}
+                if [ -n "$major" ] && [ "$major" -gt 555 ] 2>/dev/null; then
+                    export ZINK_FORCE_OVERRIDE=1
+                    export __GLX_VENDOR_LIBRARY_NAME=mesa
+                    export MESA_LOADER_DRIVER_OVERRIDE=zink
+                    export GALLIUM_DRIVER=zink
+                    export WEBKIT_DISABLE_DMABUF_RENDERER=1
+                    if [ -f /usr/share/glvnd/egl_vendor.d/50_mesa.json ]; then
+                        export __EGL_VENDOR_LIBRARY_FILENAMES=/usr/share/glvnd/egl_vendor.d/50_mesa.json
+                    fi
+                fi
+            fi
+            ;;
+    esac
+fi
+
+exec /usr/libexec/orca-slicer/bin/orca-slicer "$@"
