@@ -5,7 +5,7 @@
 %global __strip /bin/true
 
 Name:           cadcraft
-Version:        0.17.1
+Version:        0.18.0
 Release:        1%{?dist}
 Summary:        Open-source computer-aided design and drafting app
 License:        MIT OR Apache-2.0
@@ -149,6 +149,9 @@ fi
 %{_datadir}/zsh/site-functions/_cadcraft-cli
 
 %changelog
+* Sat Nov 07 2026 github-actions[bot] <github-actions[bot]@users.noreply.github.com> - 0.18.0-1
+- update to 0.18.0
+
 * Thu Nov 05 2026 github-actions[bot] <github-actions[bot]@users.noreply.github.com> - 0.17.1-1
 - update to 0.17.1
 
