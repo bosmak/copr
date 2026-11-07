@@ -5,7 +5,7 @@
 %global __strip /bin/true
 
 Name:           deckcraft
-Version:        0.15.1
+Version:        0.16.0
 Release:        1%{?dist}
 Summary:        Open-source presentation app that works the way PowerPoint users expect
 License:        MIT OR Apache-2.0
@@ -142,6 +142,9 @@ fi
 %{_datadir}/mime/packages/ai.storyteller.deckcraft.xml
 
 %changelog
+* Sat Nov 07 2026 github-actions[bot] <github-actions[bot]@users.noreply.github.com> - 0.16.0-1
+- update to 0.16.0
+
 * Thu Nov 05 2026 github-actions[bot] <github-actions[bot]@users.noreply.github.com> - 0.15.1-1
 - update to 0.15.1
 
