@@ -5,7 +5,7 @@
 %global __strip /bin/true
 
 Name:           pdfcraft
-Version:        0.19.0
+Version:        0.20.0
 Release:        1%{?dist}
 Summary:        Open-source PDF workbench: read, comment, fill and sign
 License:        MIT OR Apache-2.0
@@ -135,6 +135,9 @@ fi
 %{_datadir}/pdfcraft/models/text-recognition.onnx.LICENCE.txt
 
 %changelog
+* Mon Nov 09 2026 github-actions[bot] <github-actions[bot]@users.noreply.github.com> - 0.20.0-1
+- update to 0.20.0
+
 * Sat Nov 07 2026 github-actions[bot] <github-actions[bot]@users.noreply.github.com> - 0.19.0-1
 - update to 0.19.0
 
