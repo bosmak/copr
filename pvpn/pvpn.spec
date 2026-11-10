@@ -9,7 +9,7 @@
 %global pvpn_dirs /etc/pvpn /var/lib/pvpn
 
 Name:           pvpn
-Version:        0.2.10
+Version:        0.2.12
 Release:        1%{?dist}
 Summary:        Proton VPN client with TUI for Linux (WireGuard + Stealth)
 License:        GPL-3.0-or-later
@@ -155,5 +155,8 @@ EOF
 %{_sysusersdir}/pvpn.conf
 
 %changelog
+* Tue Nov 10 2026 github-actions[bot] <github-actions[bot]@users.noreply.github.com> - 0.2.12-1
+- update to 0.2.12
+
 * Thu Oct 16 2025 Gustavo Bosmak <gustavo.bosmak@gmail.com> - 0.2.10-1
 - initial COPR package
