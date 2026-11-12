@@ -5,7 +5,7 @@
 %global __strip /bin/true
 
 Name:           vectorcraft
-Version:        0.24.0
+Version:        0.24.1
 Release:        1%{?dist}
 Summary:        Open-source vector illustration app
 License:        MIT OR Apache-2.0
@@ -139,6 +139,9 @@ fi
 %{_datadir}/mime/packages/ai.storyteller.vectorcraft.xml
 
 %changelog
+* Thu Nov 12 2026 github-actions[bot] <github-actions[bot]@users.noreply.github.com> - 0.24.1-1
+- update to 0.24.1
+
 * Thu Nov 12 2026 github-actions[bot] <github-actions[bot]@users.noreply.github.com> - 0.24.0-1
 - update to 0.24.0
 
