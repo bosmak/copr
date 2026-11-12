@@ -5,7 +5,7 @@
 %global __strip /bin/true
 
 Name:           solidcraft
-Version:        0.30.1
+Version:        0.40.1
 Release:        1%{?dist}
 Summary:        Open-source parametric 3D CAD application
 License:        MIT OR Apache-2.0
@@ -135,6 +135,9 @@ fi
 %{_datadir}/mime/packages/io.tangencylabs.solidcraft.xml
 
 %changelog
+* Thu Nov 12 2026 github-actions[bot] <github-actions[bot]@users.noreply.github.com> - 0.40.1-1
+- update to 0.40.1
+
 * Tue Nov 03 2026 github-actions[bot] <github-actions[bot]@users.noreply.github.com> - 0.30.1-1
 - update to 0.30.1
 
