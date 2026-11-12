@@ -233,14 +233,16 @@ uses `language: system`, so it needs an rpmlint installed on the host.
 ## CI behaviour worth knowing
 
 - `packages.yml` discovers packages by globbing `*/*.spec`. It rebuilds
-  only the packages whose own directory changed, and everything only when
-  the pipeline itself changed (`.github/workflows/packages.yml`) — a change
-  of the smoke test, of the scripts of the local builds or of the workflow
-  of the auto-update does not change what is packaged, so nothing is
-  rebuilt and the SRPMs that are already in COPR are left alone. A change
-  of `.github/scripts/vendor.sh` rebuilds the packages with vendored
-  dependencies, and only them. `README.md` / `description` changes only
-  refresh the COPR project metadata.
+  only the packages whose own directory changed. The pipeline has two
+  halves: the job that *selects* the packages (`discover`) and the one
+  that *builds* them (`publish`) — only a change of the second one
+  rebuilds everything, because only it changes what is packaged. A change
+  of the smoke test, of the scripts of the local builds or of the
+  workflow of the auto-update rebuilds nothing, so the SRPMs that are
+  already in COPR are left alone. A change of `.github/scripts/vendor.sh`
+  rebuilds the packages with vendored dependencies, and only them.
+  `README.md` / `description` changes only refresh the COPR project
+  metadata.
 - The SRPM is submitted to COPR **only** on a push to `main`; pull requests
   build but do not publish.
 - The workflow only builds the SRPM — COPR builds the binary RPM from it.

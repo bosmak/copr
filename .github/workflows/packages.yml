@@ -48,14 +48,20 @@ jobs:
 
             build_pkgs=""
 
-            # The pipeline itself is the only thing that changes every
-            # package. The rest of .github does not: the smoke test only
-            # checks the packages that are built, the scripts of the
-            # local builds are not used here, and the workflow of the
-            # auto-update only opens pull requests. A change of those
-            # files does not rebuild anything, so the SRPMs that are
-            # already in COPR are left alone.
-            if printf '%s\n' "$changed" | grep -qE '^\.github/workflows/packages\.yml$'; then
+            # The pipeline has two parts: the job that selects the
+            # packages to build and the job that builds them. Only the
+            # second one changes what is packaged, so only it rebuilds
+            # everything. A change of the selection (or of the scripts of
+            # the smoke test) leaves the packages that are already in
+            # COPR alone.
+            publish_job() {
+                git show "$1:.github/workflows/packages.yml" 2>/dev/null | awk '
+                    /^  publish:$/ { job = 1; print; next }
+                    job && /^  [a-zA-Z_-]+:$/ { exit }
+                    job'
+            }
+            if [ "$(publish_job "$base")" != \
+                 "$(publish_job "${{ github.sha }}")" ]; then
               build_pkgs="$all_pkgs"
             fi
 
