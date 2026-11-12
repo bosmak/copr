@@ -5,7 +5,7 @@
 %global __strip /bin/true
 
 Name:           photocraft
-Version:        0.23.0
+Version:        0.23.1
 Release:        1%{?dist}
 Summary:        Open-source image editor with familiar, professional tools
 License:        MIT OR Apache-2.0
@@ -162,6 +162,9 @@ fi
 %{_datadir}/zsh/site-functions/_photocraft-cli
 
 %changelog
+* Thu Nov 12 2026 github-actions[bot] <github-actions[bot]@users.noreply.github.com> - 0.23.1-1
+- update to 0.23.1
+
 * Thu Nov 12 2026 github-actions[bot] <github-actions[bot]@users.noreply.github.com> - 0.23.0-1
 - update to 0.23.0
 
