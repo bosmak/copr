@@ -1,0 +1,11 @@
+#!/bin/sh
+# Rebuild the driver of the CS9711.
+#
+# The driver is not built here: it is shipped by the cs9711-fingerprint
+# package, so a rebuild is an update of the package itself. The
+# graphical manager runs this script when the user asks for a rebuild
+# of the driver.
+
+echo "The driver of the CS9711 is shipped by the cs9711-fingerprint package." >&2
+echo "Update it with: dnf upgrade cs9711-fingerprint" >&2
+exit 1

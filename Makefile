@@ -97,8 +97,9 @@ $(1)-rpm: $(1)-srpm
 	@echo "==> $(1): binary RPM -> $(TOPDIR)/$(1)/RPMS"
 	@# The packages that are built from source are built in a container:
 	@# their toolchain and build dependencies are installed there, so the
-	@# host does not need them.
-	@if grep -q -- '-vendor\.tar\.xz' $(1)/*.spec; then \
+	@# host does not need them. A package that has no vendored sources
+	@# asks for it with the marker in its spec.
+	@if grep -qE -- '-vendor\.tar\.xz|^# build-in-container' $(1)/*.spec; then \
 		BUILD_IMAGE=$(BUILD_IMAGE) \
 		.github/scripts/build-in-container.sh $(1) $(TOPDIR)/$(1); \
 	else \

@@ -1,0 +1,9 @@
+#!/bin/sh
+# Launcher of the CS9711 Fingerprint Manager.
+#
+# The manager is installed in the private directory of the package: it
+# looks for its data (the version, the helpers and the patches) in the
+# directory of its own script, so the launcher keeps that layout
+# working.
+
+exec /usr/libexec/cs9711-fingerprint/cs9711-manager.py "$@"

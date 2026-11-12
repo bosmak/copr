@@ -9,6 +9,7 @@ My [Fedora COPR packages](https://copr.fedorainfracloud.org/coprs/bosmak/copr/).
 - [steam-fix-trayicon](steam-fix-trayicon/) — Steam tray icon: double click opens the Steam window
 - [solidcraft](solidcraft/) — open-source parametric 3D CAD
 - [xwayland-satellite](xwayland-satellite/) — rootless Xwayland integration for Wayland compositors
+- [cs9711-fingerprint](cs9711-fingerprint/) — driver and manager for the Chipsailing CS9711 fingerprint scanner
 - [artcraft-launcher](artcraft-launcher/) — installs and updates the Craft App Suite
 - [cadcraft](cadcraft/) — computer-aided design and drafting (AutoCAD-like)
 - [deckcraft](deckcraft/) — presentations and slide shows (PowerPoint-like)

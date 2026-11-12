@@ -48,9 +48,26 @@ jobs:
 
             build_pkgs=""
 
-            # Workflow changes affect every package's build — rebuild all.
-            if printf '%s\n' "$changed" | grep -qE '^\.github/'; then
+            # The pipeline itself is the only thing that changes every
+            # package. The rest of .github does not: the smoke test only
+            # checks the packages that are built, the scripts of the
+            # local builds are not used here, and the workflow of the
+            # auto-update only opens pull requests. A change of those
+            # files does not rebuild anything, so the SRPMs that are
+            # already in COPR are left alone.
+            if printf '%s\n' "$changed" | grep -qE '^\.github/workflows/packages\.yml$'; then
               build_pkgs="$all_pkgs"
+            fi
+
+            # The vendored dependencies of the source packages are part
+            # of their SRPM, so a change of the script that vendors them
+            # rebuilds them (and only them).
+            if printf '%s\n' "$changed" | grep -qE '^\.github/scripts/vendor\.sh$'; then
+              for d in $(echo "$all_pkgs" | tr ',' ' '); do
+                if grep -q -- '-vendor\.tar\.xz' "$d"/*.spec 2>/dev/null; then
+                  build_pkgs="$build_pkgs,$d"
+                fi
+              done
             fi
 
             # Otherwise only rebuild packages whose own files changed.

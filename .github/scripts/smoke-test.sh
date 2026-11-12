@@ -163,6 +163,27 @@ for rpm_file in "$pkgs_dir"/*.rpm; do
             # usage without one.
             run orca-slicer --help
             ;;
+        cs9711-fingerprint)
+            # The driver of the scanner has to be the library the
+            # linker resolves, and it has to have the driver of the
+            # CS9711 in it.
+            resolved=$(ldconfig -p 2>/dev/null |
+                awk '/libfprint-2\.so\.2 /{print $NF; exit}')
+            if [ "$resolved" = "/usr/local/lib64/libfprint-2.so.2" ]; then
+                ok "the linker resolves the driver of the package"
+            else
+                fail "the linker resolves $resolved"
+            fi
+            if grep -aq cs9711 "$resolved" 2>/dev/null; then
+                ok "the driver of the CS9711 is in the library"
+            else
+                fail "the library has no driver of the CS9711"
+            fi
+            # The manager needs a display to do its job, but it can be
+            # checked without one.
+            run python3 -m py_compile \
+                /usr/libexec/cs9711-fingerprint/cs9711-manager.py
+            ;;
         *)
             run "$name-cli" --version
             ;;

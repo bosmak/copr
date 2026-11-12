@@ -43,6 +43,18 @@ sudo dnf install clip-bridge
 
 Upstream: <https://github.com/noctisynth/clip-bridge>
 
+### cs9711-fingerprint
+
+[![License: LGPL-2.1-or-later AND MIT](https://img.shields.io/badge/License-LGPL--2.1--or--later%20AND%20MIT-blue.svg)](https://github.com/mmhfarooque/chipsailing-cs9711-fingerprint-linux/blob/main/LICENSE)
+
+Driver and graphical manager for the Chipsailing CS9711 USB fingerprint scanner.
+
+```sh
+sudo dnf install cs9711-fingerprint
+```
+
+Upstream: <https://github.com/mmhfarooque/chipsailing-cs9711-fingerprint-linux>
+
 ### deckcraft
 
 [![License: MIT OR Apache-2.0](https://img.shields.io/badge/License-MIT%20OR%20Apache--2.0-blue.svg)](https://github.com/storytold/deckcraft/blob/main/LICENSE)

@@ -44,6 +44,7 @@ Top-level files:
 | `pvpn` | prebuilt upstream binaries (Go, static), plus upstream systemd units |
 | `clip-bridge` | prebuilt upstream binary (Rust) + own systemd **user** unit |
 | `xwayland-satellite` | **built from source** (Rust, cargo-rpm-macros, vendored crates) |
+| `cs9711-fingerprint` | **built from source** (C with meson, a driver built from a pinned commit) |
 | `steam-fix-trayicon` | **own source** in this repo (Python script + systemd user unit) |
 | `solidcraft`, `artcraft-launcher`, `wordcraft`, `cadcraft`, `deckcraft`, `designcraft`, `effectcraft`, `figcraft`, `filmcraft`, `gridcraft`, `lightcraft`, `pdfcraft`, `photocraft`, `soundcraft`, `vectorcraft` | **rebundles of an upstream RPM** (Craft App Suite / solidcraft) |
 
@@ -90,6 +91,21 @@ you are touching:
 - `%build` uses `%cargo_build -f <features>`; `%check` uses
   `%cargo_test ... -- --lib` (integration tests need a live session).
 - `ExclusiveArch` only if upstream is arch-limited.
+
+### 3b. Built from source (C with meson)
+
+- The spec has the marker `# build-in-container`: the Makefile then builds
+  the binary RPM in a container (`.github/scripts/build-in-container.sh`),
+  which installs the `BuildRequires` of the spec, so the host needs neither
+  the toolchain nor the development packages.
+- The sources of a dependency that has no releases are pinned to a commit
+  (`Source1` is an `archive/<sha>.tar.gz` URL) — the build has to produce
+  the same thing every time. The nightly job does not bump it: it is
+  bumped by hand.
+- A library that shadows the one of the distribution goes to `/usr/local`,
+  with a drop-in of `/etc/ld.so.conf.d` to make the linker prefer it. The
+  library of the distribution stays installed and is used again when the
+  package is removed.
 
 ### 4. Packages owned by this repo
 
@@ -160,11 +176,13 @@ Prerequisites, none of which come from mise:
 | `rpmlint` | `make lint` and the pre-commit hook (it runs as a *system* tool, so it has to be installed on the host) |
 | podman or docker | `make test`, and `make rpm` of the source packages |
 
-The source packages (`xwayland-satellite`) are the exception: their binary
-RPM is built inside a `fedora:44` container by
+The source packages (`xwayland-satellite`, `cs9711-fingerprint`) are the
+exception: their binary RPM is built inside a `fedora:44` container by
 `.github/scripts/build-in-container.sh`, which installs the spec's
-`BuildRequires` there — so no Rust toolchain is needed on the host. Only the
-vendoring (`vendor.sh`) needs `cargo`/`go`, or a container to do it in.
+`BuildRequires` there — so no Rust toolchain (and no meson, no compiler)
+is needed on the host. The package asks for it with the marker
+`# build-in-container` in its spec. Only the vendoring (`vendor.sh`) needs
+`cargo`/`go`, or a container to do it in.
 
 Everything builds inside `./build` (`BUILDDIR`); `~/rpmbuild` is never used.
 Each package gets its own topdir (`build/<pkg>/`) so sources never mix.
@@ -201,6 +219,9 @@ uses `language: system`, so it needs an rpmlint installed on the host.
    Then fill in the `%description` and check the spec by hand.
 2. For a source build, add the vendor tarball handling: the spec expects
    `<pkg>-vendor.tar.xz` as `Source1`, produced by `.github/scripts/vendor.sh`.
+   A source build without vendored dependencies (a C one, for example) asks
+   for the container build with the marker `# build-in-container` in its
+   spec, so the host needs no toolchain.
 3. Add the package to `README.md` (package list) and to `install_instructions`
    (a `### <pkg>` section with the license badge, a short description, the
    `dnf install` line and the upstream link). `install_instructions` is pushed
@@ -212,9 +233,14 @@ uses `language: system`, so it needs an rpmlint installed on the host.
 ## CI behaviour worth knowing
 
 - `packages.yml` discovers packages by globbing `*/*.spec`. It rebuilds
-  everything when anything under `.github/` changed, otherwise only the
-  packages whose own directory changed. `README.md` / `description` changes
-  only refresh the COPR project metadata.
+  only the packages whose own directory changed, and everything only when
+  the pipeline itself changed (`.github/workflows/packages.yml`) — a change
+  of the smoke test, of the scripts of the local builds or of the workflow
+  of the auto-update does not change what is packaged, so nothing is
+  rebuilt and the SRPMs that are already in COPR are left alone. A change
+  of `.github/scripts/vendor.sh` rebuilds the packages with vendored
+  dependencies, and only them. `README.md` / `description` changes only
+  refresh the COPR project metadata.
 - The SRPM is submitted to COPR **only** on a push to `main`; pull requests
   build but do not publish.
 - The workflow only builds the SRPM — COPR builds the binary RPM from it.
@@ -245,8 +271,9 @@ uses `language: system`, so it needs an rpmlint installed on the host.
 - `rpmlint` must stay clean, but `make lint` does not enforce it: the
   Makefile runs it with `|| true`. The pre-commit hook is what gates the
   commits. The current baseline is one `W: no-%check-section` warning per
-  spec, plus `W: invalid-url Source1` for `xwayland-satellite` (a local
-  source file); rpmlint exits 0 on warnings, so the CI step stays green.
+  spec without a `%check` section, plus `W: invalid-url Source1` for
+  `xwayland-satellite` (a local source file); rpmlint exits 0 on warnings,
+  so the CI step stays green.
 - The `smoke-test.sh` script has a per-package `case` to check that the
   application starts — add a new entry there for a new package, otherwise the
   generic `<name>-cli --version` fallback will be used.
