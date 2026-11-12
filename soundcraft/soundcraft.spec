@@ -5,7 +5,7 @@
 %global __strip /bin/true
 
 Name:           soundcraft
-Version:        0.19.0
+Version:        0.20.1
 Release:        1%{?dist}
 Summary:        Open-source digital audio workstation: record, edit and mix
 License:        MIT OR Apache-2.0
@@ -142,6 +142,9 @@ fi
 %{_datadir}/zsh/site-functions/_soundcraft-cli
 
 %changelog
+* Thu Nov 12 2026 github-actions[bot] <github-actions[bot]@users.noreply.github.com> - 0.20.1-1
+- update to 0.20.1
+
 * Mon Nov 09 2026 github-actions[bot] <github-actions[bot]@users.noreply.github.com> - 0.19.0-1
 - update to 0.19.0
 
