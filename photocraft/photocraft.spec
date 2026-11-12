@@ -5,7 +5,7 @@
 %global __strip /bin/true
 
 Name:           photocraft
-Version:        0.22.0
+Version:        0.23.0
 Release:        1%{?dist}
 Summary:        Open-source image editor with familiar, professional tools
 License:        MIT OR Apache-2.0
@@ -83,6 +83,8 @@ install -Dm644 payload/usr/share/doc/photocraft/OFL-noto-sans-symbols.txt %{buil
 install -Dm644 payload/usr/share/doc/photocraft/OFL-noto-sans-thai.txt %{buildroot}%{_licensedir}/photocraft/OFL-noto-sans-thai.txt
 install -Dm644 payload/usr/share/doc/photocraft/OFL-shippori-mincho.txt %{buildroot}%{_licensedir}/photocraft/OFL-shippori-mincho.txt
 install -Dm644 payload/usr/share/doc/photocraft/README.md %{buildroot}%{_docdir}/photocraft/README.md
+install -Dm644 payload/usr/share/doc/photocraft/control-protocol.md %{buildroot}%{_docdir}/photocraft/control-protocol.md
+install -Dm644 payload/usr/share/doc/photocraft/mcp.md %{buildroot}%{_docdir}/photocraft/mcp.md
 install -Dm644 payload/usr/share/fish/vendor_completions.d/photocraft-cli.fish %{buildroot}%{_datadir}/fish/vendor_completions.d/photocraft-cli.fish
 install -Dm644 payload/usr/share/icons/hicolor/128x128/apps/ai.storyteller.photocraft.png %{buildroot}%{_datadir}/icons/hicolor/128x128/apps/ai.storyteller.photocraft.png
 install -Dm644 payload/usr/share/icons/hicolor/16x16/apps/ai.storyteller.photocraft.png %{buildroot}%{_datadir}/icons/hicolor/16x16/apps/ai.storyteller.photocraft.png
@@ -137,6 +139,8 @@ fi
 %license %{_licensedir}/photocraft/OFL-*
 %doc %{_docdir}/photocraft/ATTRIBUTION.md
 %doc %{_docdir}/photocraft/README.md
+%doc %{_docdir}/photocraft/control-protocol.md
+%doc %{_docdir}/photocraft/mcp.md
 %{_bindir}/photocraft
 %{_bindir}/photocraft-cli
 %{_datadir}/applications/ai.storyteller.photocraft.desktop
@@ -158,6 +162,9 @@ fi
 %{_datadir}/zsh/site-functions/_photocraft-cli
 
 %changelog
+* Thu Nov 12 2026 github-actions[bot] <github-actions[bot]@users.noreply.github.com> - 0.23.0-1
+- update to 0.23.0
+
 * Mon Nov 09 2026 github-actions[bot] <github-actions[bot]@users.noreply.github.com> - 0.22.0-1
 - update to 0.22.0
 
