@@ -7,7 +7,7 @@
 %global __strip /bin/true
 
 Name:           orca-slicer
-Version:        2.5.0
+Version:        2.5.1
 Release:        1%{?dist}
 Summary:        Advanced 3D printing slicer with improved compatibility
 License:        AGPL-3.0-only
@@ -138,6 +138,9 @@ fi
 %{_datadir}/mime/packages/com.orcaslicer.OrcaSlicer.xml
 
 %changelog
+* Sat Nov 14 2026 github-actions[bot] <github-actions[bot]@users.noreply.github.com> - 2.5.1-1
+- update to 2.5.1
+
 * Sat Nov 07 2026 github-actions[bot] <github-actions[bot]@users.noreply.github.com> - 2.5.0-1
 - update to 2.5.0
 
