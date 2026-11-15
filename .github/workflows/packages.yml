@@ -9,6 +9,15 @@ on:
 permissions:
   contents: read
 
+env:
+  # The chroots of the COPR project. "copr-cli modify --chroot" replaces
+  # the whole set: the chroots that are not listed are disabled.
+  COPR_CHROOTS: >-
+    fedora-rawhide-x86_64
+    fedora-45-x86_64
+    fedora-44-x86_64
+    fedora-43-x86_64
+
 jobs:
   discover:
     runs-on: ubuntu-24.04
@@ -253,22 +262,29 @@ jobs:
             echo "token = ${COPR_TOKEN}"
             echo 'copr_url = https://copr.fedorainfracloud.org'
           } > ~/.config/copr
-      - name: Ensure COPR project exists
+      - name: Ensure COPR project and its chroots exist
         env:
           COPR_OWNER: ${{ vars.COPR_OWNER }}
           COPR_PROJECT: ${{ vars.COPR_PROJECT }}
         run: |
+          chroot_args=()
+          for chroot in $COPR_CHROOTS; do
+            chroot_args+=(--chroot "$chroot")
+          done
+
           if copr-cli get "$COPR_PROJECT" >/dev/null 2>&1; then
             echo "COPR project '$COPR_OWNER/$COPR_PROJECT' already exists."
           else
             echo "Creating COPR project '$COPR_OWNER/$COPR_PROJECT'..."
             copr-cli create "$COPR_PROJECT" \
-              --chroot fedora-rawhide-x86_64 \
-              --chroot fedora-44-x86_64 \
-              --chroot fedora-43-x86_64 \
+              "${chroot_args[@]}" \
               --description "Personal COPR packages"
             echo "Created."
           fi
+
+          # The creation only sets the chroots of a new project.
+          echo "Enabling the chroots: $COPR_CHROOTS"
+          copr-cli modify "$COPR_PROJECT" "${chroot_args[@]}"
       - name: Update COPR project metadata
         env:
           COPR_PROJECT: ${{ vars.COPR_PROJECT }}

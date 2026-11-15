@@ -49,9 +49,10 @@ requires=$(awk '/^BuildRequires:/ { print $2 }' "$spec")
 for req in $requires; do
     case $req in
         pkgconfig\(*\))
+            # The newline matters: dnf prints every provider on a single line.
             pkg=$(
                 "$container" run --rm "$image" \
-                    dnf repoquery --qf '%{name}' --whatprovides "$req" 2>/dev/null |
+                    dnf repoquery --qf '%{name}\n' --whatprovides "$req" 2>/dev/null |
                     head -1
             )
             [ -n "$pkg" ] && packages="$packages $pkg"

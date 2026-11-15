@@ -6,9 +6,14 @@
 # nothing else is touched).
 %global __strip /bin/true
 
+# The FFmpeg libraries are private: the application is built against the
+# ones of Ubuntu 24.04, and Fedora ships another version of them.
+%global __requires_exclude ^(libavcodec|libavformat|libavutil|libswscale)[.]so[.].*$
+%global __provides_exclude ^(libavcodec|libavformat|libavutil|libswscale)[.]so[.].*$
+
 Name:           orca-slicer
 Version:        2.5.1
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Advanced 3D printing slicer with improved compatibility
 License:        AGPL-3.0-only
 URL:            https://github.com/OrcaSlicer/OrcaSlicer
@@ -82,10 +87,17 @@ chmod +x %{SOURCE0}
 install -Dm755 squashfs-root/bin/orca-slicer %{buildroot}%{_libexecdir}/orca-slicer/bin/orca-slicer
 cp -a squashfs-root/resources %{buildroot}%{_libexecdir}/orca-slicer/resources
 
-# The runpath of the binary points to the build machine of upstream
-# (a directory that does not exist anywhere else), so it is useless and
-# rpm refuses to package a binary with it.
-patchelf --remove-rpath %{buildroot}%{_libexecdir}/orca-slicer/bin/orca-slicer
+# The FFmpeg libraries of the AppImage: the application is built against
+# the ones of Ubuntu 24.04, and Fedora ships another version of them.
+install -d %{buildroot}%{_libexecdir}/orca-slicer/lib
+for lib in libavcodec.so.61 libavformat.so.61 libavutil.so.59 libswscale.so.8; do
+    cp -a squashfs-root/lib/orca-runtime/$lib* %{buildroot}%{_libexecdir}/orca-slicer/lib/
+done
+
+# The runpath of the binary points to the build machine of upstream, so
+# it is replaced with the directory of the private libraries.
+patchelf --set-rpath '$ORIGIN/../lib' \
+    %{buildroot}%{_libexecdir}/orca-slicer/bin/orca-slicer
 
 # The launcher runs the binary of the private directory. It is rewritten
 # here so the path of the binary is not hardcoded in the repository.
@@ -131,6 +143,7 @@ fi
 %license %{_licensedir}/orca-slicer/LICENSE.txt
 %{_bindir}/orca-slicer
 %{_libexecdir}/orca-slicer/bin/orca-slicer
+%{_libexecdir}/orca-slicer/lib
 %{_libexecdir}/orca-slicer/resources
 %{_datadir}/applications/com.orcaslicer.OrcaSlicer.desktop
 %{_datadir}/icons/hicolor/192x192/apps/OrcaSlicer.png
@@ -138,6 +151,10 @@ fi
 %{_datadir}/mime/packages/com.orcaslicer.OrcaSlicer.xml
 
 %changelog
+* Sun Nov 15 2026 Gustavo Bosmak <gustavo.bosmak@gmail.com> - 2.5.1-2
+- ship the FFmpeg libraries of the AppImage, so the package works on the
+  releases of Fedora that have another version of them
+
 * Sat Nov 14 2026 github-actions[bot] <github-actions[bot]@users.noreply.github.com> - 2.5.1-1
 - update to 2.5.1
 

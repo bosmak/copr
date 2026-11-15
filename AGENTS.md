@@ -46,6 +46,7 @@ Top-level files:
 | `xwayland-satellite` | **built from source** (Rust, cargo-rpm-macros, vendored crates) |
 | `cs9711-fingerprint` | **built from source** (C with meson, a driver built from a pinned commit) |
 | `steam-fix-trayicon` | **own source** in this repo (Python script + systemd user unit) |
+| `orca-slicer` | prebuilt upstream binary (an AppImage), repacked with Fedora's layout |
 | `solidcraft`, `artcraft-launcher`, `wordcraft`, `cadcraft`, `deckcraft`, `designcraft`, `effectcraft`, `figcraft`, `filmcraft`, `gridcraft`, `lightcraft`, `pdfcraft`, `photocraft`, `soundcraft`, `vectorcraft` | **rebundles of an upstream RPM** (Craft App Suite / solidcraft) |
 
 Package kinds differ in the spec, so pick the pattern that matches the package
@@ -257,6 +258,11 @@ uses `language: system`, so it needs an rpmlint installed on the host.
 - The auto-update bot only knows packages whose upstream release/tag naming
   follows that convention. If a package needs custom handling, it belongs in
   `owned_packages` and is bumped by hand.
+- The chroots of the COPR project are the `COPR_CHROOTS` environment variable
+  of `packages.yml`: every package is built for each of them. A new Fedora
+  release is added there, and the `update-copr` job enables the chroot on the
+  project with `copr-cli modify --chroot`. That call **replaces** the whole
+  set of the chroots of the project, so the list has to be complete.
 
 ## Gotchas
 
