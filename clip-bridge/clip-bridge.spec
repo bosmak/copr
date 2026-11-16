@@ -4,8 +4,8 @@
 %global __strip /bin/true
 
 Name:           clip-bridge
-Version:        0.1.9
-Release:        2%{?dist}
+Version:        0.2.0
+Release:        1%{?dist}
 Summary:        Sync your X11 and Wayland clipboard seamlessly
 License:        MIT
 URL:            https://github.com/noctisynth/clip-bridge
@@ -99,6 +99,9 @@ EOF
 %{_userunitdir}/clip-bridge.service
 
 %changelog
+* Mon Nov 16 2026 github-actions[bot] <github-actions[bot]@users.noreply.github.com> - 0.2.0-1
+- update to 0.2.0
+
 * Wed Oct 28 2026 Gustavo Bosmak <gustavo.bosmak@gmail.com> - 0.1.9-2
 - install the systemd user unit with the systemd user unit macro instead of
   the hardcoded path
