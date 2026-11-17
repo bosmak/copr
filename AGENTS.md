@@ -47,6 +47,7 @@ Top-level files:
 | `cs9711-fingerprint` | **built from source** (C with meson, a driver built from a pinned commit) |
 | `steam-fix-trayicon` | **own source** in this repo (Python script + systemd user unit) |
 | `orca-slicer` | prebuilt upstream binary (an AppImage), repacked with Fedora's layout |
+| `limusic` | **rebundle of an upstream RPM** (a Tauri application) |
 | `solidcraft`, `artcraft-launcher`, `wordcraft`, `cadcraft`, `deckcraft`, `designcraft`, `effectcraft`, `figcraft`, `filmcraft`, `gridcraft`, `lightcraft`, `pdfcraft`, `photocraft`, `soundcraft`, `vectorcraft` | **rebundles of an upstream RPM** (Craft App Suite / solidcraft) |
 
 Package kinds differ in the spec, so pick the pattern that matches the package
@@ -65,11 +66,16 @@ you are touching:
 - `%build` is empty ("we ship upstream's prebuilt binaries verbatim").
 - `ExclusiveArch: x86_64` when upstream only ships x86_64 builds.
 
-### 2. Rebundles of an upstream RPM (Craft App Suite, solidcraft)
+### 2. Rebundles of an upstream RPM (Craft App Suite, solidcraft, limusic)
 
-- `Source0` is upstream's `.rpm`; `Source1` is upstream's checksum list.
-- `%prep` verifies the checksum, then unpacks with
+- `Source0` is upstream's `.rpm`; `Source1` is upstream's checksum list, when
+  upstream publishes one. When it does not, the RPM is fetched over TLS and
+  its digest is recorded in the changelog.
+- `%prep` verifies the checksum when there is one, then unpacks with
   `rpm2archive -n %{SOURCE0} | tar -xf - -C payload`.
+- Upstream's RPM does not always ship its license: when it does not, the
+  license of the tag is taken from `raw.githubusercontent.com` and installed
+  from the source that holds it.
 - `%install` copies files out of `payload/` into Fedora's layout:
   licenses → `%{_licensedir}`, docs → `%{_docdir}`.
 - The GUI stack (winit/xkbcommon, libX11, Vulkan) is `dlopen()`ed at runtime,
