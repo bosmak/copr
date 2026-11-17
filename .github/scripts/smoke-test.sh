@@ -150,6 +150,11 @@ for rpm_file in "$pkgs_dir"/*.rpm; do
             # It needs a display to do its job.
             ok "skipped: it needs a display"
             ;;
+        limusic)
+            # It is a GTK application: it panics when there is no
+            # display to open a window on.
+            ok "skipped: it needs a display"
+            ;;
         xwayland-satellite)
             # It needs a Wayland session to do its job, but it can print
             # its version and its usage without one.

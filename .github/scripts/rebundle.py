@@ -29,10 +29,11 @@ import tempfile
 
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-# The upstream RPMs are built outside of Fedora: some of them depend on
-# plain sonames instead of on the packages that provide them. rpm's
-# automatic ELF detection does not see them either, the GUI stack is
-# dlopen()ed at runtime.
+# The upstream RPMs list the libraries they need as plain sonames
+# instead of as the packages that provide them. This table translates
+# them into the names of the Fedora packages that ship them. The GUI
+# stack of the Rust applications is dlopen()ed at runtime, so rpm's
+# automatic ELF detection does not see it either.
 SONAME_TO_PACKAGE = {
     "libX11.so.6": "libX11",
     "libX11-xcb.so.1": "libX11-xcb",
@@ -46,6 +47,10 @@ SONAME_TO_PACKAGE = {
     "libEGL.so.1": "mesa-libEGL",
     "libasound.so.2": "alsa-lib",
     "libglvnd-egl": "mesa-libEGL",
+    "libappindicator3.so.1": "libappindicator-gtk3",
+    "libayatana-appindicator3.so.1": "libayatana-appindicator-gtk3",
+    "libwebkit2gtk-4.1.so.0": "webkit2gtk4.1",
+    "libgtk-3.so.0": "gtk3",
 }
 
 # Detected by rpm from the ELF headers, so they must not be listed by hand.
@@ -58,6 +63,9 @@ AUTO_DETECTED = (
     "libdl.so.2",
     "libpthread.so.0",
 )
+
+# The names the license of a project has in its repository.
+LICENSE_NAMES = ("LICENSE", "LICENSE.md", "LICENSE.txt", "COPYING")
 
 SPEC_HEADER = """\
 %global debug_package %{{nil}}
@@ -79,34 +87,34 @@ URL:            {url}
 Source0:        {source0}
 """
 
-SPEC_SOURCE1 = """\
-# Upstream's checksum list, used in the prep section to verify Source0.
-Source1:        {source1}
-"""
-
 SPEC_REQUIRES = """\
-# The GUI stack (winit/xkbcommon) is dlopen()ed at runtime, so rpm's
-# automatic ELF dependency detection does not see it. Upstream's own RPM
-# requires these explicitly, so we do the same.
+# Upstream's own RPM requires its libraries explicitly, so we do the
+# same: the sonames it lists are translated into the Fedora packages
+# that provide them. Some of them are loaded with dlopen() at runtime,
+# so rpm's automatic ELF dependency detection does not see them.
 """
 
 # The comment that opens the block of requirements derived from the
 # upstream RPM. Everything else in the spec is hand written and kept.
-DERIVED_REQUIRES_MARKER = "# The GUI stack (winit/xkbcommon) is dlopen()ed"
+# The second one is the comment of the packages that were generated
+# before it was made generic.
+DERIVED_REQUIRES_MARKERS = (
+    "# Upstream's own RPM requires its libraries explicitly",
+    "# The GUI stack (winit/xkbcommon) is dlopen()ed",
+)
 
 SPEC_ARCH = """
 # Upstream only publishes x86_64 Linux builds.
 ExclusiveArch:  x86_64
 """
 
-SPEC_PREP = """
-%prep
+SPEC_PREP_CHECKSUM = """\
 # Verify the downloaded RPM against upstream's checksum list.
 rpm_file=%{SOURCE0}
 base=$(basename "$rpm_file")
-expected=$(awk -v f="$base" '$2 == f { print $1 }' %{SOURCE1})
+expected=$(awk -v f="$base" '$2 == f { print $1 }' @CHECKSUM@)
 if [ -z "$expected" ]; then
-    echo "No checksum for $base in %{SOURCE1}" >&2
+    echo "No checksum for $base in @CHECKSUM@" >&2
     exit 1
 fi
 actual=$(sha256sum "$rpm_file" | awk '{ print $1 }')
@@ -115,11 +123,30 @@ if [ "$expected" != "$actual" ]; then
     exit 1
 fi
 
+"""
+
+SPEC_PREP_NO_CHECKSUM = """\
+# Upstream publishes no checksum list for its releases, so the RPM is
+# fetched over TLS from the official release page. Its digest is
+# recorded in the changelog.
+
+"""
+
+SPEC_PREP_UNPACK = """\
 # Unpack the upstream RPM payload. rpm2archive turns the RPM into a tar of
 # its files, so we need neither cpio nor bsdtar to read it.
 mkdir -p payload
 rpm2archive -n %{SOURCE0} | tar -xf - -C payload
 
+"""
+
+SPEC_PREP_LICENSE = """\
+# The upstream RPM ships no license, so the one of the tag is used.
+install -Dm644 @LICENSE@ payload/usr/share/doc/@NAME@/LICENSE
+
+"""
+
+SPEC_BUILD = """\
 %build
 # Nothing to build — we ship upstream's prebuilt binaries verbatim.
 """
@@ -197,6 +224,10 @@ def payload_files(dest):
 def normalize_dep(dep):
     """Turn one upstream requirement into a Fedora package name."""
     dep = dep.replace("(64bit)", "")
+    if dep.startswith("rpmlib("):
+        # The capabilities of the rpm library itself are always
+        # satisfied by the rpm of the build root.
+        return ""
     dep = re.sub(r"\([^)]*\)", "", dep).strip()
     if any(dep.startswith(prefix) for prefix in AUTO_DETECTED):
         return ""
@@ -349,14 +380,98 @@ def unique(seq):
     return out
 
 
+def payload_has_license(payload_dir):
+    """Whether the payload of the upstream RPM holds a license."""
+    return any(
+        os.path.basename(f).startswith(("LICENSE", "COPYING", "NOTICE"))
+        for f in payload_files(payload_dir)
+    )
+
+
+def upstream_repo(source0):
+    """The GitHub repository and the tag prefix of an upstream URL."""
+    m = re.match(
+        r"^https?://github\.com/([^/]+/[^/]+)/releases/download/([^/%]+)%\{version\}",
+        source0,
+    )
+    if not m:
+        return "", ""
+    return m.group(1), m.group(2)
+
+
+def url_exists(url):
+    """Whether a URL answers."""
+    return (
+        subprocess.run(
+            ["curl", "-fsSLI", url],
+            check=False,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+        ).returncode
+        == 0
+    )
+
+
+def guess_license_url(source0, version):
+    """The license of the upstream tag, when the RPM ships none.
+
+    Upstream does not always put its license in the RPM, so the one of
+    the tag is used instead.
+    """
+    repo, prefix = upstream_repo(source0)
+    if not repo:
+        return ""
+    for name in LICENSE_NAMES:
+        url = f"https://raw.githubusercontent.com/{repo}/{prefix}{version}/{name}"
+        if url_exists(url):
+            return url.replace(version, "%{version}")
+    return ""
+
+
+def fetch_license(url, version, dest):
+    """Download the license of the upstream tag."""
+    os.makedirs(os.path.dirname(dest), exist_ok=True)
+    run(["curl", "-fsSL", url.replace("%{version}", version), "-o", dest])
+
+
+def source_macro(sources, role):
+    """The macro of the source with a role, if the package has one."""
+    for index, source in enumerate(sources):
+        if source["role"] == role:
+            return f"%{{SOURCE{index}}}"
+    return ""
+
+
+def render_prep(name, sources):
+    """The prep and build sections of the spec.
+
+    The checksum list and the license are both optional: upstream does
+    not always publish a checksum list, and its RPM does not always
+    ship the license.
+    """
+    checksum = source_macro(sources, "checksum")
+    license_ = source_macro(sources, "license")
+    out = ["\n%prep\n"]
+    if checksum:
+        out.append(SPEC_PREP_CHECKSUM.replace("@CHECKSUM@", checksum))
+    else:
+        out.append(SPEC_PREP_NO_CHECKSUM)
+    out.append(SPEC_PREP_UNPACK)
+    if license_:
+        out.append(
+            SPEC_PREP_LICENSE.replace("@LICENSE@", license_).replace("@NAME@", name)
+        )
+    out.append(SPEC_BUILD)
+    return "".join(out)
+
+
 def render_spec(
     name,
     version,
     summary,
     license_,
     url,
-    source0,
-    source1,
+    sources,
     requires,
     extras,
     description,
@@ -373,11 +488,12 @@ def render_spec(
             summary=summary,
             license=license_,
             url=url,
-            source0=source0,
+            source0=sources[0]["url"],
         )
     ]
-    if source1:
-        out.append(SPEC_SOURCE1.format(source1=source1))
+    for index, source in enumerate(sources[1:], start=1):
+        out.append(source["comment"] + "\n")
+        out.append(f"Source{index}:        {source['url']}\n")
     if requires:
         out.append("\n")
         out.append(SPEC_REQUIRES)
@@ -386,7 +502,7 @@ def render_spec(
         out.append(extra + "\n")
     out.append(SPEC_ARCH)
     out.append(f"\n%description\n{description.rstrip()}\n")
-    out.append(SPEC_PREP)
+    out.append(render_prep(name, sources))
     out.append("\n%install\n")
     out.extend(line + "\n" for line in install)
     out.append(SPEC_POST)
@@ -397,31 +513,6 @@ def render_spec(
     out.append("\n%changelog\n")
     out.append(changelog.strip("\n") + "\n")
     return "".join(out)
-
-
-def split_requirements(text):
-    """The block of requirements derived from the upstream RPM.
-
-    It is the marker comment plus the plain "Requires:" lines that follow
-    it. Everything else (a "Requires(post):", a "Recommends:", ...) was
-    added by hand and is left alone.
-    """
-    lines = text.splitlines()
-    derived = []
-    in_derived = False
-
-    for line in lines:
-        if line.startswith(DERIVED_REQUIRES_MARKER):
-            in_derived = True
-            derived.append(line)
-            continue
-        if in_derived:
-            if line.startswith("#") or re.match(r"^Requires:[ \t]", line):
-                derived.append(line)
-                continue
-            in_derived = False
-
-    return derived
 
 
 def update_spec(text, version, requires, install, files_lines, licenses, docs, entry):
@@ -441,9 +532,9 @@ def update_spec(text, version, requires, install, files_lines, licenses, docs, e
 
     # The requirements derived from the upstream RPM.
     derived = re.compile(
-        r"^"
-        + re.escape(DERIVED_REQUIRES_MARKER)
-        + r"[^\n]*\n(?:#[^\n]*\n)*(?:Requires:[ \t][^\n]*\n)*",
+        r"^(?:"
+        + "|".join(re.escape(marker) for marker in DERIVED_REQUIRES_MARKERS)
+        + r")[^\n]*\n(?:#[^\n]*\n)*(?:Requires:[ \t][^\n]*\n)*",
         re.MULTILINE,
     )
     if requires:
@@ -487,30 +578,28 @@ def update_spec(text, version, requires, install, files_lines, licenses, docs, e
     return text
 
 
-def spec_fields(text):
-    """Pull the hand written parts out of an existing spec."""
-    fields = {}
+def spec_sources(text):
+    """The sources of a spec, indexed by their number."""
+    sources = {}
+    for number, url in re.findall(
+        r"^Source(\d+):[ \t]*(\S+)[ \t]*$", text, re.MULTILINE
+    ):
+        sources[int(number)] = url
+    return sources
 
-    def grab(pattern, key):
-        m = re.search(pattern, text, re.MULTILINE)
-        if m:
-            fields[key] = m.group(1).strip()
 
-    grab(r"^Summary:[ \t]*(.*)$", "summary")
-    grab(r"^License:[ \t]*(.*)$", "license")
-    grab(r"^URL:[ \t]*(.*)$", "url")
-    grab(r"^Source0:[ \t]*(.*)$", "source0")
-    grab(r"^Source1:[ \t]*(.*)$", "source1")
+def find_license_source(sources):
+    """The number and the URL of the source that holds the license.
 
-    m = re.search(r"^%description\n(.*?)(?=^%\w)", text, re.MULTILINE | re.DOTALL)
-    if m:
-        fields["description"] = m.group(1).strip("\n")
-
-    m = re.search(r"^%changelog\n(.*)", text, re.MULTILINE | re.DOTALL)
-    if m:
-        fields["changelog"] = m.group(1).strip("\n")
-
-    return fields
+    Only a source that is fetched over the network is of interest here:
+    the license of a package that is vendored in this repository is not
+    downloaded again.
+    """
+    for number, url in sorted(sources.items()):
+        base = url.rsplit("/", 1)[-1].split("#")[-1]
+        if base in LICENSE_NAMES and url.startswith("http"):
+            return number, url
+    return None, ""
 
 
 def guess_sha_url(source0, version):
@@ -518,15 +607,7 @@ def guess_sha_url(source0, version):
     base = source0.replace("%{version}", version).rsplit("/", 1)[0]
     for candidate in ("SHA256SUMS.txt", "SHA256SUMS", "sha256sums.txt"):
         url = f"{base}/{candidate}"
-        if (
-            subprocess.run(
-                ["curl", "-fsSLI", url],
-                check=False,
-                stdout=subprocess.DEVNULL,
-                stderr=subprocess.DEVNULL,
-            ).returncode
-            == 0
-        ):
+        if url_exists(url):
             # Keep the version placeholder, so the spec can be bumped
             # without touching it.
             return url.replace(version, "%{version}")
@@ -558,10 +639,52 @@ def cmd_generate(args):
         license_ = args.license or rpm_query(rpm, "%{LICENSE}")
         url = args.url or rpm_query(rpm, "%{URL}")
         requires = derive_requires(rpm)
+
+        # The sources of the package: the RPM of upstream, its checksum
+        # list when it publishes one, and the license of the tag when
+        # the RPM ships none.
+        sources = [
+            {
+                "comment": "",
+                "url": args.rpm_url,
+                "role": "rpm",
+            }
+        ]
+        checksum_url = "" if args.no_sha else guess_sha_url(args.rpm_url, args.version)
+        if checksum_url:
+            sources.append(
+                {
+                    "comment": (
+                        "# Upstream's checksum list, used in the prep section to"
+                        " verify Source0."
+                    ),
+                    "url": checksum_url,
+                    "role": "checksum",
+                }
+            )
+        license_url = ""
+        if not payload_has_license(payload_dir):
+            license_url = guess_license_url(args.rpm_url, args.version)
+        if license_url:
+            sources.append(
+                {
+                    "comment": (
+                        "# The upstream RPM ships no license, so the one of the"
+                        " tag is used."
+                    ),
+                    "url": license_url,
+                    "role": "license",
+                }
+            )
+            fetch_license(
+                license_url,
+                args.version,
+                os.path.join(payload_dir, "usr", "share", "doc", args.name, "LICENSE"),
+            )
+
         install, files_lines, licenses, docs = map_payload(
             args.name, payload_files(payload_dir)
         )
-        source1 = "" if args.no_sha else guess_sha_url(args.rpm_url, args.version)
 
         description = (
             args.description or "TODO: describe the package in a few sentences."
@@ -578,8 +701,7 @@ def cmd_generate(args):
             summary,
             license_,
             url,
-            args.rpm_url,
-            source1,
+            sources,
             requires,
             [],
             description,
@@ -620,9 +742,9 @@ def cmd_refresh(args):
 
     with open(spec_path) as f:
         text = f.read()
-    fields = spec_fields(text)
 
-    source0 = fields.get("source0", "")
+    sources = spec_sources(text)
+    source0 = sources.get(0, "")
     if not source0:
         raise Error(f"{spec_path} has no Source0")
 
@@ -630,16 +752,24 @@ def cmd_refresh(args):
     try:
         payload_dir = os.path.join(tmpdir, "payload")
         unpack_payload(rpm, payload_dir)
+
+        # The RPM of upstream does not ship a license, so the one of the
+        # tag is used. It has to be in the payload before it is mapped,
+        # or the license would be missing from the package.
+        _, license_url = find_license_source(sources)
+        if license_url and not payload_has_license(payload_dir):
+            fetch_license(
+                license_url,
+                args.version,
+                os.path.join(payload_dir, "usr", "share", "doc", args.name, "LICENSE"),
+            )
+
         requires = derive_requires(rpm)
         install, files_lines, licenses, docs = map_payload(
             args.name, payload_files(payload_dir)
         )
     finally:
         shutil.rmtree(tmpdir, ignore_errors=True)
-
-    source1 = fields.get("source1", "")
-    if not source1:
-        source1 = guess_sha_url(source0, args.version)
 
     if args.no_changelog:
         entry = ""

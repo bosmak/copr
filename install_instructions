@@ -139,6 +139,19 @@ sudo dnf install lightcraft
 
 Upstream: <https://github.com/storytold/lightcraft>
 
+### limusic
+
+[![License: GPL-3.0-or-later](https://img.shields.io/badge/License-GPL--3.0--or--later-blue.svg)](https://github.com/SimoHypers/limusic/blob/master/LICENSE)
+
+Desktop client for YouTube Music: plays the songs of your library and the
+playlists, shows the synchronized lyrics and scrobbles to Last.fm.
+
+```sh
+sudo dnf install limusic
+```
+
+Upstream: <https://github.com/SimoHypers/limusic>
+
 ### orca-slicer
 
 [![License: AGPL-3.0-only](https://img.shields.io/badge/License-AGPL--3.0--only-blue.svg)](https://github.com/OrcaSlicer/OrcaSlicer/blob/master/LICENSE.txt)
