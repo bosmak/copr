@@ -5,7 +5,7 @@
 %global __strip /bin/true
 
 Name:           solidcraft
-Version:        0.43.0
+Version:        0.44.0
 Release:        1%{?dist}
 Summary:        Open-source parametric 3D CAD application
 License:        MIT OR Apache-2.0
@@ -18,9 +18,10 @@ Source0:        https://github.com/tangency-labs/solidcraft/releases/download/v%
 # Upstream's checksum list, used in the prep section to verify Source0.
 Source1:        https://github.com/tangency-labs/solidcraft/releases/download/v%{version}/SHA256SUMS.txt
 
-# The GUI stack (winit/xkbcommon) is dlopen()ed at runtime, so rpm's
-# automatic ELF dependency detection does not see it. Upstream's own RPM
-# requires these explicitly, so we do the same.
+# Upstream's own RPM requires its libraries explicitly, so we do the
+# same: the sonames it lists are translated into the Fedora packages
+# that provide them. Some of them are loaded with dlopen() at runtime,
+# so rpm's automatic ELF dependency detection does not see them.
 Requires:       libxkbcommon
 Requires:       libxkbcommon-x11
 Requires:       libwayland-client
@@ -78,7 +79,6 @@ rpm2archive -n %{SOURCE0} | tar -xf - -C payload
 %install
 install -Dm755 payload/usr/bin/solidcraft %{buildroot}%{_bindir}/solidcraft
 install -Dm755 payload/usr/bin/solidcraft-cli %{buildroot}%{_bindir}/solidcraft-cli
-install -Dm755 payload/usr/bin/solvecraft-cli %{buildroot}%{_bindir}/solvecraft-cli
 install -Dm644 payload/usr/share/applications/io.tangencylabs.solidcraft.desktop %{buildroot}%{_datadir}/applications/io.tangencylabs.solidcraft.desktop
 install -Dm644 payload/usr/share/doc/solidcraft/LICENSE-APACHE %{buildroot}%{_licensedir}/solidcraft/LICENSE-APACHE
 install -Dm644 payload/usr/share/doc/solidcraft/LICENSE-MIT %{buildroot}%{_licensedir}/solidcraft/LICENSE-MIT
@@ -128,13 +128,15 @@ fi
 %doc %{_docdir}/solidcraft/THIRD-PARTY-LICENSES.txt
 %{_bindir}/solidcraft
 %{_bindir}/solidcraft-cli
-%{_bindir}/solvecraft-cli
 %{_datadir}/applications/io.tangencylabs.solidcraft.desktop
 %{_datadir}/icons/hicolor/*/apps/io.tangencylabs.solidcraft.png
 %{_datadir}/metainfo/io.tangencylabs.solidcraft.metainfo.xml
 %{_datadir}/mime/packages/io.tangencylabs.solidcraft.xml
 
 %changelog
+* Tue Nov 17 2026 github-actions[bot] <github-actions[bot]@users.noreply.github.com> - 0.44.0-1
+- update to 0.44.0
+
 * Mon Nov 16 2026 github-actions[bot] <github-actions[bot]@users.noreply.github.com> - 0.43.0-1
 - update to 0.43.0
 
