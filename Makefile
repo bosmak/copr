@@ -82,8 +82,8 @@ $(1)-srpm:
 	 find $(TOPDIR)/$(1)/SOURCES -maxdepth 1 -type f ! -name "*$$version*" -delete
 	@find $(1) -type f ! -name '*.spec' -exec cp -t $(TOPDIR)/$(1)/SOURCES/ {} +
 	@cp $(1)/*.spec $(TOPDIR)/$(1)/SPECS/
-	@# The Go and Rust dependencies are vendored into a tarball, so the
-	@# build itself does not need the network.
+	@# Source dependencies and frontend assets are staged in a tarball,
+	@# so the RPM build itself does not need the network.
 	@if grep -q -- '-vendor\.tar\.xz' $(1)/*.spec; then \
 		VENDOR_IMAGE=$(VENDOR_IMAGE) \
 		.github/scripts/vendor.sh $(1) $(TOPDIR)/$(1)/SOURCES; \

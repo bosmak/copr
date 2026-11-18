@@ -11,6 +11,7 @@ My [Fedora COPR packages](https://copr.fedorainfracloud.org/coprs/bosmak/copr/).
 - [xwayland-satellite](xwayland-satellite/) — rootless Xwayland integration for Wayland compositors
 - [cs9711-fingerprint](cs9711-fingerprint/) — driver and manager for the Chipsailing CS9711 fingerprint scanner
 - [limusic](limusic/) — desktop client for YouTube Music
+- [limusic-fork](limusic-fork/) — Limusic fork with Chromecast, Google Home and DLNA casting
 - [artcraft-launcher](artcraft-launcher/) — installs and updates the Craft App Suite
 - [cadcraft](cadcraft/) — computer-aided design and drafting (AutoCAD-like)
 - [deckcraft](deckcraft/) — presentations and slide shows (PowerPoint-like)

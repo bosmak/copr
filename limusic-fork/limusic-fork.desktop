@@ -1,0 +1,9 @@
+[Desktop Entry]
+Categories=AudioVideo;Audio;Music;
+Comment=Limusic fork — desktop YouTube Music client with casting support
+Exec=limusic-fork-app
+StartupWMClass=limusic-fork-app
+Icon=limusic-fork
+Name=Limusic Fork
+Terminal=false
+Type=Application
