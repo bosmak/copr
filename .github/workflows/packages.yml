@@ -139,7 +139,7 @@ jobs:
         # binary RPMs themselves are built by COPR, not here.
         run: |
           dnf install -y rpm-build rpmlint systemd-rpm-macros copr-cli jq \
-              cargo cargo-rpm-macros
+              cargo cargo-rpm-macros pnpm patch
 
       - name: Stage upstream source and generate vendor tarball
         env:
@@ -148,6 +148,7 @@ jobs:
           set -eu
           spec=$(ls "$PKG_DIR"/*.spec)
           version=$(grep -m1 '^Version:' "$spec" | awk '{print $2}')
+          commit=$(awk '/^%global commit /{print $3; exit}' "$spec")
 
           mkdir -p /tmp/rpmbuild/SOURCES
 
@@ -155,10 +156,11 @@ jobs:
           # SOURCES/. Local-file sources (no scheme) are handled by the
           # "Stage auxiliary package files" step below.
           #
-          # For each URL: substitute %{version} (rpm macros aren't
-          # expanded when reading the spec directly; bash ${var//pat/rep}
-          # would mangle the URL because '{' is a glob brace). Strip any
-          # '#/filename' fragment when computing the basename, but use
+          # For each URL: substitute %{version} and %{commit} (rpm macros
+          # aren't expanded when reading the spec directly; bash
+          # ${var//pat/rep} would mangle the URL because '{' is a glob
+          # brace). Strip any '#/filename' fragment when computing the
+          # basename, but use
           # the fragment as the on-disk filename if present (matching
           # RPM's behavior).
           awk '
@@ -169,6 +171,8 @@ jobs:
           ' "$spec" | while IFS= read -r url; do
               [ -z "$url" ] && continue
               resolved=$(printf '%s' "$url" | sed "s|%{version}|$version|g")
+              [ -n "$commit" ] && \
+                  resolved=$(printf '%s' "$resolved" | sed "s|%{commit}|$commit|g")
               url_no_frag="${resolved%%#*}"
               fname="$(basename "$url_no_frag")"
               if [[ "$resolved" == *#/* ]]; then
@@ -179,8 +183,8 @@ jobs:
           done
 
           # If Source0 is a source tarball with a go.mod or Cargo.toml,
-          # vendor its deps into a local tarball so the build can be
-          # offline. The vendor tarball name is hardcoded to
+          # vendor its dependencies and build any frontend into a local
+          # tarball so the RPM build can be offline. The tarball name is
           # "${PKG_DIR}-vendor.tar.xz" — independent of whatever Source1
           # happens to be used for in the spec (SHA256SUMS, sysusers
           # conf, etc.).

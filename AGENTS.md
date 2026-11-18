@@ -48,6 +48,7 @@ Top-level files:
 | `steam-fix-trayicon` | **own source** in this repo (Python script + systemd user unit) |
 | `orca-slicer` | prebuilt upstream binary (an AppImage), repacked with Fedora's layout |
 | `limusic` | **rebundle of an upstream RPM** (a Tauri application) |
+| `limusic-fork` | **built from source** (a Tauri application with a SvelteKit frontend) |
 | `solidcraft`, `artcraft-launcher`, `wordcraft`, `cadcraft`, `deckcraft`, `designcraft`, `effectcraft`, `figcraft`, `filmcraft`, `gridcraft`, `lightcraft`, `pdfcraft`, `photocraft`, `soundcraft`, `vectorcraft` | **rebundles of an upstream RPM** (Craft App Suite / solidcraft) |
 
 Package kinds differ in the spec, so pick the pattern that matches the package

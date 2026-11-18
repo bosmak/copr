@@ -35,10 +35,10 @@ jobs:
           git config user.name  'github-actions[bot]'
           git config user.email 'github-actions[bot]@users.noreply.github.com'
 
-          # Packages maintained in this repository have no separate upstream
-          # to check. Their versions are bumped manually and published by the
-          # packages workflow when the change is merged.
+          # These packages are updated by a dedicated workflow or by hand,
+          # not by the generic upstream-release check below.
           owned_packages=(
+            limusic-fork
             steam-fix-trayicon
           )
 

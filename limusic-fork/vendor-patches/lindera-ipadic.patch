@@ -1,0 +1,36 @@
+--- a/build.rs
++++ b/build.rs
+@@ -3,7 +3,7 @@
+ #[cfg(feature = "ipadic")]
+ fn main() -> Result<(), Box<dyn Error>> {
+     use std::env;
+-    use std::fs::{create_dir, rename, File};
++    use std::fs::{create_dir, File};
+     use std::io::{self, Cursor, Read, Write};
+     use std::path::Path;
+ 
+@@ -57,20 +57,11 @@
+         // Source file path for build package
+         let source_path_for_build = Path::new(&build_dir).join(file_name);
+ 
+-        // Download source file to build directory
++        // Copy the dictionary from the package source instead of downloading it.
+         if !source_path_for_build.exists() {
+-            // copy(&source_path, &source_path_for_build)?;
+-            let tmp_path = Path::new(&build_dir).join(file_name.to_owned() + ".download");
+-
+-            // Download a tarball
+-            let download_url = "https://github.com/lindera-morphology/mecab-ipadic/archive/refs/tags/2.7.0-20070801.tar.gz";
+-            let resp = ureq::get(download_url).call()?;
+-            let mut dest = File::create(&tmp_path)?;
+-
+-            io::copy(&mut resp.into_reader(), &mut dest)?;
+-            dest.flush()?;
+-
+-            rename(tmp_path, &source_path_for_build).expect("Failed to rename temporary file");
++            let archive = env::var_os("LINDERA_IPADIC_ARCHIVE")
++                .expect("LINDERA_IPADIC_ARCHIVE must point to the IPADIC archive");
++            std::fs::copy(&archive, &source_path_for_build)?;
+         }
+ 
+         // Decompress a tar.gz file

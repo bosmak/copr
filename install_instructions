@@ -152,6 +152,20 @@ sudo dnf install limusic
 
 Upstream: <https://github.com/SimoHypers/limusic>
 
+### limusic-fork
+
+[![License: GPL-3.0-or-later](https://img.shields.io/badge/License-GPL--3.0--or--later-blue.svg)](https://github.com/bosmak/limusic/blob/feature/cast/LICENSE)
+
+Desktop client for YouTube Music, built from the `feature/cast` branch of
+Gustavo Bosmak's fork. It can cast the current queue to Chromecast, Google Home
+and DLNA renderers on the local network.
+
+```sh
+sudo dnf install limusic-fork
+```
+
+Source: <https://github.com/bosmak/limusic/tree/feature/cast>
+
 ### orca-slicer
 
 [![License: AGPL-3.0-only](https://img.shields.io/badge/License-AGPL--3.0--only-blue.svg)](https://github.com/OrcaSlicer/OrcaSlicer/blob/master/LICENSE.txt)

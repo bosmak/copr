@@ -1,0 +1,113 @@
+name: limusic-fork branch update
+
+on:
+  schedule:
+    - cron: '30 6 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  update:
+    runs-on: ubuntu-24.04
+    container:
+      image: fedora:44
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: deps
+        run: dnf install -y git gh curl python3
+
+      - name: Update the branch pin
+        id: update
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+
+          commit=$(
+            git ls-remote https://github.com/bosmak/limusic.git \
+              refs/heads/feature/cast | awk '{print $1}'
+          )
+          [ -n "$commit" ]
+
+          current=$(
+            awk '/^%global commit /{print $3; exit}' \
+              limusic-fork/limusic-fork.spec
+          )
+          if [ "$commit" = "$current" ]; then
+            echo "The feature/cast branch is already at $commit."
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          curl -fsSL \
+            "https://raw.githubusercontent.com/bosmak/limusic/$commit/Cargo.toml" \
+            -o /tmp/limusic-Cargo.toml
+          version=$(
+            python3 - <<'PY'
+          import tomllib
+
+          with open("/tmp/limusic-Cargo.toml", "rb") as f:
+              cargo = tomllib.load(f)
+          print(cargo["workspace"]["package"]["version"])
+          PY
+          )
+          [ -n "$version" ]
+
+          git config user.name 'github-actions[bot]'
+          git config user.email \
+            'github-actions[bot]@users.noreply.github.com'
+
+          branch="auto-update/limusic-fork-${commit:0:12}"
+          git fetch origin \
+            "$branch:refs/remotes/origin/$branch" 2>/dev/null || true
+          if git show-ref --verify --quiet "refs/remotes/origin/$branch"; then
+            remote_commit=$(
+              git show "origin/$branch:limusic-fork/limusic-fork.spec" |
+                awk '/^%global commit /{print $3; exit}'
+            )
+            pr_number=$(
+              gh pr list --head "$branch" --state open \
+                --json number --jq '.[0].number // empty'
+            )
+            if [ "$remote_commit" = "$commit" ] && [ -n "$pr_number" ]; then
+              echo "A pull request for $commit already exists."
+              echo "changed=false" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+            if [ -n "$pr_number" ]; then
+              gh pr close "$pr_number" \
+                --comment "Superseded by a newer feature/cast commit."
+            fi
+            git push origin --delete "$branch"
+          fi
+
+          git checkout -B main origin/main
+          git checkout -B "$branch" origin/main
+
+          python3 .github/scripts/update-limusic-fork.py \
+            --commit "$commit" --version "$version"
+          git diff --check
+          git diff -- limusic-fork/limusic-fork.spec
+
+          git add limusic-fork/limusic-fork.spec
+          git commit -m "chore: update limusic-fork to $commit"
+          git push -u origin "$branch"
+
+          gh pr create \
+            --base main \
+            --head "$branch" \
+            --title "chore: update limusic-fork to ${commit:0:12}" \
+            --body "The \`feature/cast\` branch of the Limusic fork moved to [$commit](https://github.com/bosmak/limusic/commit/$commit).
+
+          Upstream application version: \`$version\`.
+
+          Merging this pull request rebuilds the SRPM and publishes the new package to COPR."
+
+          echo "changed=true" >> "$GITHUB_OUTPUT"

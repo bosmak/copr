@@ -150,7 +150,7 @@ for rpm_file in "$pkgs_dir"/*.rpm; do
             # It needs a display to do its job.
             ok "skipped: it needs a display"
             ;;
-        limusic)
+        limusic | limusic-fork)
             # It is a GTK application: it panics when there is no
             # display to open a window on.
             ok "skipped: it needs a display"
