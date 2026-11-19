@@ -5,7 +5,7 @@
 %global __strip /bin/true
 
 Name:           limusic
-Version:        1.3.0
+Version:        1.4.0
 Release:        1%{?dist}
 Summary:        Desktop client for YouTube Music
 License:        GPL-3.0-or-later
@@ -27,6 +27,8 @@ Source1:        https://raw.githubusercontent.com/SimoHypers/limusic/v%{version}
 # so rpm's automatic ELF dependency detection does not see them.
 Requires:       libappindicator-gtk3
 Requires:       mpv-libs
+Requires:       libssl.so.3
+Requires:       libcrypto.so.3
 Requires:       webkit2gtk4.1
 Requires:       gtk3
 
@@ -106,6 +108,9 @@ fi
 %{_datadir}/icons/hicolor/*/apps/limusic-app.png
 
 %changelog
+* Thu Nov 19 2026 github-actions[bot] <github-actions[bot]@users.noreply.github.com> - 1.4.0-1
+- update to 1.4.0
+
 * Mon Nov 16 2026 Gustavo Bosmak <gustavo.bosmak@gmail.com> - 1.3.0-1
 - initial COPR package (rebundle of the upstream RPM)
 - sha256 of the upstream RPM:
