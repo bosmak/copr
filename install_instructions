@@ -226,6 +226,18 @@ sudo dnf install pvpn
 
 Upstream: <https://github.com/YourDoritos/pVPN>
 
+### scalpel
+
+[![License: AGPL-3.0-only](https://img.shields.io/badge/License-AGPL--3.0--only-blue.svg)](https://github.com/scalpelpoe/scalpel/blob/main/LICENSE)
+
+Overlay for Path of Exile: edit the loot filter of the game while it runs, price check items and audit the economy of the league.
+
+```sh
+sudo dnf install scalpel
+```
+
+Upstream: <https://github.com/scalpelpoe/scalpel>
+
 ### solidcraft
 
 [![License: MIT OR Apache-2.0](https://img.shields.io/badge/License-MIT%20OR%20Apache--2.0-blue.svg)](https://github.com/tangency-labs/solidcraft/blob/main/LICENSE)

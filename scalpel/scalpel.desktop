@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=Scalpel
+GenericName=Path of Exile Overlay
+Comment=Edit the loot filter, price check items and audit the economy of Path of Exile
+Exec=scalpel %U
+Icon=scalpel
+Terminal=false
+Type=Application
+StartupWMClass=scalpel
+Categories=Game;
