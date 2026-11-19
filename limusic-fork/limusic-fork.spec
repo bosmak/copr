@@ -2,7 +2,7 @@
 
 Name:           limusic-fork
 Version:        1.4.0~rc.10
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Desktop client for YouTube Music with casting support
 License:        GPL-3.0-or-later
 URL:            https://github.com/bosmak/limusic/tree/feature/cast
@@ -86,7 +86,13 @@ export RUSTY_V8_ARCHIVE=%{SOURCE3}
 # command cannot select src-tauri directly. Calling cargo without
 # RUSTC_BOOTSTRAP also keeps rustix 0.37 from enabling compiler attributes
 # that current Rust releases reject.
-CARGO_HOME=.cargo RUSTFLAGS='%{build_rustflags}' /usr/bin/cargo build --profile rpm --manifest-path src-tauri/Cargo.toml
+#
+# The custom-protocol feature is the one the Tauri CLI passes when it
+# builds an application. Without it Tauri takes the build for a
+# development one: the frontend is not embedded in the binary and the
+# window loads the development server of the project
+# (http://localhost:5183) instead of the assets.
+CARGO_HOME=.cargo RUSTFLAGS='%{build_rustflags}' /usr/bin/cargo build --profile rpm --manifest-path src-tauri/Cargo.toml --features tauri/custom-protocol
 
 %install
 install -Dm755 target/rpm/limusic-app %{buildroot}%{_bindir}/limusic-fork-app
@@ -125,6 +131,11 @@ fi
 %{_datadir}/icons/hicolor/*/apps/limusic-fork.png
 
 %changelog
+* Thu Nov 19 2026 Gustavo Bosmak <gustavo.bosmak@gmail.com> - 1.4.0~rc.10-2
+- build with the custom-protocol feature of Tauri: without it the build is
+  a development one, the frontend is not embedded in the binary and the
+  window asks the development server of the project for it
+
 * Wed Nov 18 2026 Gustavo Bosmak <gustavo.bosmak@gmail.com> - 1.4.0~rc.10-1
 - initial COPR package built from the feature/cast fork branch
 - upstream commit: c0a3ca36cbb4734c1b1a79ebc052993c0e23c4c1
