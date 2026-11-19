@@ -41,16 +41,34 @@ Top-level files:
 
 | Package | Kind |
 |---|---|
-| `pvpn` | prebuilt upstream binaries (Go, static), plus upstream systemd units |
-| `clip-bridge` | prebuilt upstream binary (Rust) + own systemd **user** unit |
-| `xwayland-satellite` | **built from source** (Rust, cargo-rpm-macros, vendored crates) |
-| `cs9711-fingerprint` | **built from source** (C with meson, a driver built from a pinned commit) |
-| `steam-fix-trayicon` | **own source** in this repo (Python script + systemd user unit) |
-| `orca-slicer` | prebuilt upstream binary (an AppImage), repacked with Fedora's layout |
+| `artcraft-launcher` | **rebundle of an upstream RPM** (Craft App Suite / solidcraft) |
 | `awakened-poe-trade` | prebuilt upstream binary (an AppImage), repacked with Fedora's layout |
+| `cadcraft` | **rebundle of an upstream RPM** (Craft App Suite / solidcraft) |
+| `clip-bridge` | prebuilt upstream binary (Rust) + own systemd **user** unit |
+| `cs9711-fingerprint` | **built from source** (C with meson, a driver built from a pinned commit) |
+| `deckcraft` | **rebundle of an upstream RPM** (Craft App Suite / solidcraft) |
+| `designcraft` | **rebundle of an upstream RPM** (Craft App Suite / solidcraft) |
+| `effectcraft` | **rebundle of an upstream RPM** (Craft App Suite / solidcraft) |
+| `figcraft` | **rebundle of an upstream RPM** (Craft App Suite / solidcraft) |
+| `filmcraft` | **rebundle of an upstream RPM** (Craft App Suite / solidcraft) |
+| `gridcraft` | **rebundle of an upstream RPM** (Craft App Suite / solidcraft) |
+| `lightcraft` | **rebundle of an upstream RPM** (Craft App Suite / solidcraft) |
 | `limusic` | **rebundle of an upstream RPM** (a Tauri application) |
 | `limusic-fork` | **built from source** (a Tauri application with a SvelteKit frontend) |
-| `solidcraft`, `artcraft-launcher`, `wordcraft`, `cadcraft`, `deckcraft`, `designcraft`, `effectcraft`, `figcraft`, `filmcraft`, `gridcraft`, `lightcraft`, `pdfcraft`, `photocraft`, `soundcraft`, `vectorcraft` | **rebundles of an upstream RPM** (Craft App Suite / solidcraft) |
+| `orca-slicer` | prebuilt upstream binary (an AppImage), repacked with Fedora's layout |
+| `pdfcraft` | **rebundle of an upstream RPM** (Craft App Suite / solidcraft) |
+| `photocraft` | **rebundle of an upstream RPM** (Craft App Suite / solidcraft) |
+| `pvpn` | prebuilt upstream binaries (Go, static), plus upstream systemd units |
+| `scalpel` | prebuilt upstream binary (an AppImage), repacked with Fedora's layout |
+| `solidcraft` | **rebundle of an upstream RPM** (Craft App Suite / solidcraft) |
+| `soundcraft` | **rebundle of an upstream RPM** (Craft App Suite / solidcraft) |
+| `steam-fix-trayicon` | **own source** in this repo (Python script + systemd user unit) |
+| `vectorcraft` | **rebundle of an upstream RPM** (Craft App Suite / solidcraft) |
+| `wordcraft` | **rebundle of an upstream RPM** (Craft App Suite / solidcraft) |
+| `xwayland-satellite` | **built from source** (Rust, cargo-rpm-macros, vendored crates) |
+
+The table, the list of `README.md` and the sections of `install_instructions`
+are all sorted alphabetically.
 
 Package kinds differ in the spec, so pick the pattern that matches the package
 you are touching:
@@ -233,8 +251,9 @@ uses `language: system`, so it needs an rpmlint installed on the host.
    spec, so the host needs no toolchain.
 3. Add the package to `README.md` (package list) and to `install_instructions`
    (a `### <pkg>` section with the license badge, a short description, the
-   `dnf install` line and the upstream link). `install_instructions` is pushed
-   to the COPR project metadata by the `update-copr` job.
+   `dnf install` line and the upstream link), keeping the alphabetical order
+   of both. `install_instructions` is pushed to the COPR project metadata by
+   the `update-copr` job.
 4. If the package is maintained in this repo (no upstream release to track),
    add its name to `owned_packages` in `.github/workflows/auto-update.yml`.
 5. Verify locally: `make <pkg>-rpm && make lint && make test`.

@@ -7,18 +7,6 @@ sudo dnf install <package-name>
 
 ## Packages
 
-### awakened-poe-trade
-
-[![License: MIT AND BSD-3-Clause](https://img.shields.io/badge/License-MIT%20AND%20BSD--3--Clause-blue.svg)](https://github.com/SnosMe/awakened-poe-trade/blob/master/LICENSE)
-
-Price checker for Path of Exile: it looks for the prices of the items of the official trade API and of the community ones.
-
-```sh
-sudo dnf install awakened-poe-trade
-```
-
-Upstream: <https://github.com/SnosMe/awakened-poe-trade>
-
 ### artcraft-launcher
 
 [![License: MIT OR Apache-2.0](https://img.shields.io/badge/License-MIT%20OR%20Apache--2.0-blue.svg)](https://github.com/storytold/craft-launcher/blob/main/LICENSE)
@@ -30,6 +18,18 @@ sudo dnf install artcraft-launcher
 ```
 
 Upstream: <https://github.com/storytold/craft-launcher>
+
+### awakened-poe-trade
+
+[![License: MIT AND BSD-3-Clause](https://img.shields.io/badge/License-MIT%20AND%20BSD--3--Clause-blue.svg)](https://github.com/SnosMe/awakened-poe-trade/blob/master/LICENSE)
+
+Price checker for Path of Exile: it looks for the prices of the items of the official trade API and of the community ones.
+
+```sh
+sudo dnf install awakened-poe-trade
+```
+
+Upstream: <https://github.com/SnosMe/awakened-poe-trade>
 
 ### cadcraft
 
