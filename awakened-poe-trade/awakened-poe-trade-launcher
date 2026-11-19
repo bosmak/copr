@@ -1,0 +1,36 @@
+#!/bin/bash
+# Launcher of Awakened PoE Trade.
+#
+# The application is an Electron one: its runtime is in the private
+# directory of the package, and this launcher only adds the arguments
+# that the runtime needs.
+
+set -e
+
+_args=()
+
+# Chromium does not support the root user: its helper processes abort
+# at startup, and the application ends up without a network. It is
+# refused here instead of starting a broken window.
+if [ "${EUID}" -eq 0 ]; then
+    echo "${0##*/}: the application cannot be run as root." >&2
+    exit 1
+fi
+
+# The ozone platform of Chromium can be forced with a variable, for the
+# setups where the automatic detection does not pick the right one.
+case "${AWAKENED_POE_TRADE_OZONE_PLATFORM:-auto}" in
+    x11)
+        _args+=("--ozone-platform=x11")
+        ;;
+    wayland)
+        _args+=("--ozone-platform=wayland")
+        ;;
+    auto)
+        ;;
+    *)
+        echo "${0##*/}: unknown ozone platform '${AWAKENED_POE_TRADE_OZONE_PLATFORM}', expected x11, wayland or auto" >&2
+        ;;
+esac
+
+exec @libexecdir@/awakened-poe-trade/awakened-poe-trade "${_args[@]}" "$@"
