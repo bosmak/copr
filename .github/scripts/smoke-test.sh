@@ -155,10 +155,24 @@ for rpm_file in "$pkgs_dir"/*.rpm; do
             # It needs a display to do its job.
             ok "skipped: it needs a display"
             ;;
-        limusic | limusic-fork)
+        limusic)
             # It is a GTK application: it panics when there is no
             # display to open a window on.
             ok "skipped: it needs a display"
+            ;;
+        limusic-fork)
+            # It is a GTK application: it panics when there is no
+            # display to open a window on.
+            ok "skipped: it needs a display"
+            # The frontend has to be embedded in the binary. A build
+            # without it asks the development server of the project for
+            # the frontend, and the connection is refused. The assets of
+            # a SvelteKit application live under "_app/immutable".
+            if grep -aq "_app/immutable" /usr/bin/limusic-fork-app; then
+                ok "the frontend is embedded in the binary"
+            else
+                fail "the frontend is not embedded in the binary"
+            fi
             ;;
         xwayland-satellite)
             # It needs a Wayland session to do its job, but it can print
