@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=Awakened PoE Trade
+GenericName=Path of Exile Price Checker
+Comment=Search the prices of the items of Path of Exile
+Exec=awakened-poe-trade %U
+Icon=awakened-poe-trade
+Terminal=false
+Type=Application
+StartupWMClass=awakened-poe-trade
+Categories=Utility;

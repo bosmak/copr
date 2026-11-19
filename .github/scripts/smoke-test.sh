@@ -146,6 +146,11 @@ for rpm_file in "$pkgs_dir"/*.rpm; do
         artcraft-launcher)
             run artcraft-launcher --version
             ;;
+        awakened-poe-trade)
+            # It is an Electron application: it needs a display to open
+            # its window.
+            ok "skipped: it needs a display"
+            ;;
         clip-bridge)
             # It needs a display to do its job.
             ok "skipped: it needs a display"
