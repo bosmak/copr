@@ -1,8 +1,5 @@
 --- a/src-tauri/tauri.conf.json
 +++ b/src-tauri/tauri.conf.json
-@@ -5 +5 @@
--  "identifier": "com.limusic.desktop",
-+  "identifier": "com.limusic.fork",
 @@ -66,3 +66 @@
 -      "endpoints": [
 -        "https://github.com/SimoHypers/limusic/releases/latest/download/latest.json"

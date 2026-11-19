@@ -17,8 +17,10 @@ Source2:        https://github.com/lindera-morphology/mecab-ipadic/archive/refs/
 # The BotGuard runtime uses the prebuilt V8 static library.
 Source3:        https://github.com/denoland/rusty_v8/releases/download/v130.0.7/librusty_v8_release_x86_64-unknown-linux-gnu.a.gz
 Source4:        limusic-fork.desktop
-# Give the fork its own application identity and disable the upstream
-# self-updater, which would otherwise replace the fork with upstream builds.
+# Disable the upstream self-updater, which would otherwise replace the
+# fork with upstream builds. The application identity is left alone: the
+# fork is the same application as the upstream one, so both use the same
+# settings, the same session and the same logs.
 Patch1:         limusic-fork.patch
 
 BuildRequires:  cargo-rpm-macros
@@ -53,7 +55,9 @@ it can send the current queue to Chromecast, Google Home and DLNA
 renderers found on the local network.
 
 The package installs a separate executable, desktop entry and icon, so
-it can be installed alongside the regular limusic package.
+it can be installed alongside the regular limusic package. It keeps the
+application identity of the upstream application, so the two share the
+settings, the session and the logs.
 
 %prep
 %autosetup -n limusic-%{commit} -p1

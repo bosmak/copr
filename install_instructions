@@ -172,6 +172,9 @@ Desktop client for YouTube Music, built from the `feature/cast` branch of
 Gustavo Bosmak's fork. It can cast the current queue to Chromecast, Google Home
 and DLNA renderers on the local network.
 
+It is the same application as the upstream `limusic`, so it shares its
+settings, its session and its logs.
+
 ```sh
 sudo dnf install limusic-fork
 ```

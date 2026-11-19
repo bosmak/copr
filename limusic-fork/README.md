@@ -11,9 +11,11 @@ fork adds casting to Chromecast, Google Home and DLNA renderers discovered on
 the local network.
 
 This package is built from source. It installs a separate executable, desktop
-entry, icon and application identity, so it can coexist with the regular
-`limusic` package. Its self-updater is disabled, so it never replaces the fork
-with an upstream build.
+entry and icon, so it can coexist with the regular `limusic` package. It
+keeps the application identity of the upstream application, so the fork is
+the same application: it shares the settings, the session and the logs with
+the upstream `limusic` package. Its self-updater is disabled, so it never
+replaces the fork with an upstream build.
 
 ## Setup
 
