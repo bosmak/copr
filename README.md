@@ -28,3 +28,4 @@ My [Fedora COPR packages](https://copr.fedorainfracloud.org/coprs/bosmak/copr/).
 - [soundcraft](soundcraft/) — digital audio workstation (Pro Tools-like)
 - [vectorcraft](vectorcraft/) — vector illustration (Illustrator-like)
 - [wordcraft](wordcraft/) — word processor (Word-like)
+- [scalpel](scalpel/) — overlay and tool suite for Path of Exile

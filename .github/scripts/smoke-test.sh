@@ -187,6 +187,11 @@ for rpm_file in "$pkgs_dir"/*.rpm; do
             # usage without one.
             run orca-slicer --help
             ;;
+        scalpel)
+            # It is an Electron application: it needs a display to open
+            # its window.
+            ok "skipped: it needs a display"
+            ;;
         cs9711-fingerprint)
             # The driver of the scanner has to be the library the
             # linker resolves, and it has to have the driver of the
