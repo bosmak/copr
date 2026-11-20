@@ -5,7 +5,7 @@
 %global __strip /bin/true
 
 Name:           limusic
-Version:        1.4.0
+Version:        1.4.1
 Release:        1%{?dist}
 Summary:        Desktop client for YouTube Music
 License:        GPL-3.0-or-later
@@ -108,6 +108,9 @@ fi
 %{_datadir}/icons/hicolor/*/apps/limusic-app.png
 
 %changelog
+* Fri Nov 20 2026 github-actions[bot] <github-actions[bot]@users.noreply.github.com> - 1.4.1-1
+- update to 1.4.1
+
 * Thu Nov 19 2026 github-actions[bot] <github-actions[bot]@users.noreply.github.com> - 1.4.0-1
 - update to 1.4.0
 
