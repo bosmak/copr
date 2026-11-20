@@ -2,7 +2,7 @@
 
 Name:           limusic-fork
 Version:        1.4.0~rc.10
-Release:        2%{?dist}
+Release:        3%{?dist}
 Summary:        Desktop client for YouTube Music with casting support
 License:        GPL-3.0-or-later
 URL:            https://github.com/bosmak/limusic/tree/feature/cast
@@ -135,6 +135,11 @@ fi
 %{_datadir}/icons/hicolor/*/apps/limusic-fork.png
 
 %changelog
+* Fri Nov 20 2026 Gustavo Bosmak <gustavo.bosmak@gmail.com> - 1.4.0~rc.10-3
+- bump the release: the previous one was rebuilt with the application
+  identity of the upstream limusic, and dnf does not see a rebuild with
+  the same version and release as an update
+
 * Thu Nov 19 2026 Gustavo Bosmak <gustavo.bosmak@gmail.com> - 1.4.0~rc.10-2
 - build with the custom-protocol feature of Tauri: without it the build is
   a development one, the frontend is not embedded in the binary and the
