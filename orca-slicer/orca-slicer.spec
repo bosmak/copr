@@ -12,8 +12,8 @@
 %global __provides_exclude ^(libavcodec|libavformat|libavutil|libswscale)[.]so[.].*$
 
 Name:           orca-slicer
-Version:        2.5.1
-Release:        2%{?dist}
+Version:        2.5.2
+Release:        1%{?dist}
 Summary:        Advanced 3D printing slicer with improved compatibility
 License:        AGPL-3.0-only
 URL:            https://github.com/OrcaSlicer/OrcaSlicer
@@ -151,6 +151,9 @@ fi
 %{_datadir}/mime/packages/com.orcaslicer.OrcaSlicer.xml
 
 %changelog
+* Sun Nov 22 2026 github-actions[bot] <github-actions[bot]@users.noreply.github.com> - 2.5.2-1
+- update to 2.5.2
+
 * Sun Nov 15 2026 Gustavo Bosmak <gustavo.bosmak@gmail.com> - 2.5.1-2
 - ship the FFmpeg libraries of the AppImage, so the package works on the
   releases of Fedora that have another version of them
