@@ -5,7 +5,7 @@
 %global __strip /bin/true
 
 Name:           pdfcraft
-Version:        0.21.1
+Version:        0.22.0
 Release:        1%{?dist}
 Summary:        Open-source PDF workbench: read, comment, fill and sign
 License:        MIT OR Apache-2.0
@@ -18,9 +18,10 @@ Source0:        https://github.com/storytold/pdfcraft/releases/download/v%{versi
 # Upstream's checksum list, used in the prep section to verify Source0.
 Source1:        https://github.com/storytold/pdfcraft/releases/download/v%{version}/SHA256SUMS.txt
 
-# The GUI stack (winit/xkbcommon) is dlopen()ed at runtime, so rpm's
-# automatic ELF dependency detection does not see it. Upstream's own RPM
-# requires these explicitly, so we do the same.
+# Upstream's own RPM requires its libraries explicitly, so we do the
+# same: the sonames it lists are translated into the Fedora packages
+# that provide them. Some of them are loaded with dlopen() at runtime,
+# so rpm's automatic ELF dependency detection does not see them.
 Requires:       libxkbcommon
 Requires:       (vulkan-loader or mesa-libEGL)
 
@@ -57,6 +58,7 @@ rpm2archive -n %{SOURCE0} | tar -xf - -C payload
 install -Dm755 payload/usr/bin/pdfcraft %{buildroot}%{_bindir}/pdfcraft
 install -Dm755 payload/usr/bin/pdfcraft-cli %{buildroot}%{_bindir}/pdfcraft-cli
 install -Dm644 payload/usr/share/applications/ai.storyteller.pdfcraft.desktop %{buildroot}%{_datadir}/applications/ai.storyteller.pdfcraft.desktop
+install -Dm644 payload/usr/share/doc/pdfcraft/ATTRIBUTION.md %{buildroot}%{_docdir}/pdfcraft/ATTRIBUTION.md
 install -Dm644 payload/usr/share/doc/pdfcraft/LICENSE-APACHE %{buildroot}%{_licensedir}/pdfcraft/LICENSE-APACHE
 install -Dm644 payload/usr/share/doc/pdfcraft/LICENSE-MIT %{buildroot}%{_licensedir}/pdfcraft/LICENSE-MIT
 install -Dm644 payload/usr/share/doc/pdfcraft/NOTICE %{buildroot}%{_licensedir}/pdfcraft/NOTICE
@@ -74,6 +76,26 @@ install -Dm644 payload/usr/share/doc/pdfcraft/OFL-noto-sans-symbols.txt %{buildr
 install -Dm644 payload/usr/share/doc/pdfcraft/OFL-noto-sans-thai.txt %{buildroot}%{_licensedir}/pdfcraft/OFL-noto-sans-thai.txt
 install -Dm644 payload/usr/share/doc/pdfcraft/OFL-shippori-mincho.txt %{buildroot}%{_licensedir}/pdfcraft/OFL-shippori-mincho.txt
 install -Dm644 payload/usr/share/doc/pdfcraft/README.md %{buildroot}%{_docdir}/pdfcraft/README.md
+install -Dm644 payload/usr/share/doc/pdfcraft/licenses/CMap-LICENSE.txt %{buildroot}%{_licensedir}/pdfcraft/licenses/CMap-LICENSE.txt
+install -Dm644 payload/usr/share/doc/pdfcraft/licenses/ICU4X-LICENSE.txt %{buildroot}%{_licensedir}/pdfcraft/licenses/ICU4X-LICENSE.txt
+install -Dm644 payload/usr/share/doc/pdfcraft/licenses/egui-Hack-Regular.txt %{buildroot}%{_licensedir}/pdfcraft/licenses/egui-Hack-Regular.txt
+install -Dm644 payload/usr/share/doc/pdfcraft/licenses/egui-OFL.txt %{buildroot}%{_licensedir}/pdfcraft/licenses/egui-OFL.txt
+install -Dm644 payload/usr/share/doc/pdfcraft/licenses/egui-UFL.txt %{buildroot}%{_licensedir}/pdfcraft/licenses/egui-UFL.txt
+install -Dm644 payload/usr/share/doc/pdfcraft/licenses/egui-emoji-icon-font-mit-license.txt %{buildroot}%{_licensedir}/pdfcraft/licenses/egui-emoji-icon-font-mit-license.txt
+install -Dm644 payload/usr/share/doc/pdfcraft/licenses/pdf-backend/hayro-cmap/LICENSE-APACHE %{buildroot}%{_licensedir}/pdfcraft/licenses/pdf-backend/hayro-cmap/LICENSE-APACHE
+install -Dm644 payload/usr/share/doc/pdfcraft/licenses/pdf-backend/hayro-cmap/LICENSE-MIT %{buildroot}%{_licensedir}/pdfcraft/licenses/pdf-backend/hayro-cmap/LICENSE-MIT
+install -Dm644 payload/usr/share/doc/pdfcraft/licenses/pdf-backend/hayro-cmap/LICENSE.txt %{buildroot}%{_licensedir}/pdfcraft/licenses/pdf-backend/hayro-cmap/LICENSE.txt
+install -Dm644 payload/usr/share/doc/pdfcraft/licenses/pdf-backend/hayro-interpret/LICENSE-APACHE %{buildroot}%{_licensedir}/pdfcraft/licenses/pdf-backend/hayro-interpret/LICENSE-APACHE
+install -Dm644 payload/usr/share/doc/pdfcraft/licenses/pdf-backend/hayro-interpret/LICENSE-MIT %{buildroot}%{_licensedir}/pdfcraft/licenses/pdf-backend/hayro-interpret/LICENSE-MIT
+install -Dm644 payload/usr/share/doc/pdfcraft/licenses/pdf-backend/hayro-interpret/assets/CGATS_LICENSE.txt %{buildroot}%{_licensedir}/pdfcraft/licenses/pdf-backend/hayro-interpret/assets/CGATS_LICENSE.txt
+install -Dm644 payload/usr/share/doc/pdfcraft/licenses/pdf-backend/hayro-interpret/assets/LICENSE_FOXIT %{buildroot}%{_licensedir}/pdfcraft/licenses/pdf-backend/hayro-interpret/assets/LICENSE_FOXIT
+install -Dm644 payload/usr/share/doc/pdfcraft/licenses/pdf-backend/hayro-jbig2/LICENSE-APACHE %{buildroot}%{_licensedir}/pdfcraft/licenses/pdf-backend/hayro-jbig2/LICENSE-APACHE
+install -Dm644 payload/usr/share/doc/pdfcraft/licenses/pdf-backend/hayro-jbig2/LICENSE-MIT %{buildroot}%{_licensedir}/pdfcraft/licenses/pdf-backend/hayro-jbig2/LICENSE-MIT
+install -Dm644 payload/usr/share/doc/pdfcraft/licenses/pdf-backend/hayro-syntax/LICENSE-APACHE %{buildroot}%{_licensedir}/pdfcraft/licenses/pdf-backend/hayro-syntax/LICENSE-APACHE
+install -Dm644 payload/usr/share/doc/pdfcraft/licenses/pdf-backend/hayro-syntax/LICENSE-MIT %{buildroot}%{_licensedir}/pdfcraft/licenses/pdf-backend/hayro-syntax/LICENSE-MIT
+install -Dm644 payload/usr/share/doc/pdfcraft/licenses/pdf-backend/hayro/LICENSE-APACHE %{buildroot}%{_licensedir}/pdfcraft/licenses/pdf-backend/hayro/LICENSE-APACHE
+install -Dm644 payload/usr/share/doc/pdfcraft/licenses/pdf-backend/hayro/LICENSE-MIT %{buildroot}%{_licensedir}/pdfcraft/licenses/pdf-backend/hayro/LICENSE-MIT
+install -Dm644 payload/usr/share/doc/pdfcraft/licenses/prc-rs-LICENSE.txt %{buildroot}%{_licensedir}/pdfcraft/licenses/prc-rs-LICENSE.txt
 install -Dm644 payload/usr/share/icons/hicolor/128x128/apps/ai.storyteller.pdfcraft.png %{buildroot}%{_datadir}/icons/hicolor/128x128/apps/ai.storyteller.pdfcraft.png
 install -Dm644 payload/usr/share/icons/hicolor/16x16/apps/ai.storyteller.pdfcraft.png %{buildroot}%{_datadir}/icons/hicolor/16x16/apps/ai.storyteller.pdfcraft.png
 install -Dm644 payload/usr/share/icons/hicolor/24x24/apps/ai.storyteller.pdfcraft.png %{buildroot}%{_datadir}/icons/hicolor/24x24/apps/ai.storyteller.pdfcraft.png
@@ -120,6 +142,8 @@ fi
 %license %{_licensedir}/pdfcraft/LICENSE-MIT
 %license %{_licensedir}/pdfcraft/NOTICE
 %license %{_licensedir}/pdfcraft/OFL-*
+%license %{_licensedir}/pdfcraft/licenses/*
+%doc %{_docdir}/pdfcraft/ATTRIBUTION.md
 %doc %{_docdir}/pdfcraft/README.md
 %{_bindir}/pdfcraft
 %{_bindir}/pdfcraft-cli
@@ -135,6 +159,9 @@ fi
 %{_datadir}/pdfcraft/models/text-recognition.onnx.LICENCE.txt
 
 %changelog
+* Mon Nov 23 2026 github-actions[bot] <github-actions[bot]@users.noreply.github.com> - 0.22.0-1
+- update to 0.22.0
+
 * Thu Nov 12 2026 github-actions[bot] <github-actions[bot]@users.noreply.github.com> - 0.21.1-1
 - update to 0.21.1
 
