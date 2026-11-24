@@ -5,7 +5,7 @@
 %global __strip /bin/true
 
 Name:           designcraft
-Version:        0.20.1
+Version:        0.21.1
 Release:        1%{?dist}
 Summary:        Open-source page layout and publishing app
 License:        MIT OR Apache-2.0
@@ -18,9 +18,10 @@ Source0:        https://github.com/storytold/designcraft/releases/download/v%{ve
 # Upstream's checksum list, used in the prep section to verify Source0.
 Source1:        https://github.com/storytold/designcraft/releases/download/v%{version}/SHA256SUMS.txt
 
-# The GUI stack (winit/xkbcommon) is dlopen()ed at runtime, so rpm's
-# automatic ELF dependency detection does not see it. Upstream's own RPM
-# requires these explicitly, so we do the same.
+# Upstream's own RPM requires its libraries explicitly, so we do the
+# same: the sonames it lists are translated into the Fedora packages
+# that provide them. Some of them are loaded with dlopen() at runtime,
+# so rpm's automatic ELF dependency detection does not see them.
 Requires:       libxkbcommon
 Requires:       libxkbcommon-x11
 Requires:       (vulkan-loader or mesa-libEGL)
@@ -126,6 +127,9 @@ fi
 %{_datadir}/mime/packages/ai.storyteller.designcraft.xml
 
 %changelog
+* Tue Nov 24 2026 github-actions[bot] <github-actions[bot]@users.noreply.github.com> - 0.21.1-1
+- update to 0.21.1
+
 * Thu Nov 12 2026 github-actions[bot] <github-actions[bot]@users.noreply.github.com> - 0.20.1-1
 - update to 0.20.1
 
