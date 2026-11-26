@@ -5,7 +5,7 @@
 %global __strip /bin/true
 
 Name:           deckcraft
-Version:        0.18.1
+Version:        0.19.1
 Release:        1%{?dist}
 Summary:        Open-source presentation app that works the way PowerPoint users expect
 License:        MIT OR Apache-2.0
@@ -18,9 +18,10 @@ Source0:        https://github.com/storytold/deckcraft/releases/download/v%{vers
 # Upstream's checksum list, used in the prep section to verify Source0.
 Source1:        https://github.com/storytold/deckcraft/releases/download/v%{version}/SHA256SUMS.txt
 
-# The GUI stack (winit/xkbcommon) is dlopen()ed at runtime, so rpm's
-# automatic ELF dependency detection does not see it. Upstream's own RPM
-# requires these explicitly, so we do the same.
+# Upstream's own RPM requires its libraries explicitly, so we do the
+# same: the sonames it lists are translated into the Fedora packages
+# that provide them. Some of them are loaded with dlopen() at runtime,
+# so rpm's automatic ELF dependency detection does not see them.
 Requires:       libxkbcommon
 Requires:       alsa-lib
 Requires:       (vulkan-loader or mesa-libEGL)
@@ -142,6 +143,9 @@ fi
 %{_datadir}/mime/packages/ai.storyteller.deckcraft.xml
 
 %changelog
+* Thu Nov 26 2026 github-actions[bot] <github-actions[bot]@users.noreply.github.com> - 0.19.1-1
+- update to 0.19.1
+
 * Thu Nov 12 2026 github-actions[bot] <github-actions[bot]@users.noreply.github.com> - 0.18.1-1
 - update to 0.18.1
 
