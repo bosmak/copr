@@ -5,7 +5,7 @@
 %global __strip /bin/true
 
 Name:           artcraft-launcher
-Version:        0.19.2
+Version:        0.20.3
 Release:        1%{?dist}
 Summary:        Install, update and launch the Craft App Suite
 License:        MIT OR Apache-2.0
@@ -18,9 +18,10 @@ Source0:        https://github.com/storytold/craft-launcher/releases/download/v%
 # Upstream's checksum list, used in the prep section to verify Source0.
 Source1:        https://github.com/storytold/craft-launcher/releases/download/v%{version}/SHA256SUMS.txt
 
-# The GUI stack (winit/xkbcommon) is dlopen()ed at runtime, so rpm's
-# automatic ELF dependency detection does not see it. Upstream's own RPM
-# requires these explicitly, so we do the same.
+# Upstream's own RPM requires its libraries explicitly, so we do the
+# same: the sonames it lists are translated into the Fedora packages
+# that provide them. Some of them are loaded with dlopen() at runtime,
+# so rpm's automatic ELF dependency detection does not see them.
 Requires:       glibc >= 2.35
 Requires:       libxkbcommon
 Requires:       libxkbcommon-x11
@@ -69,6 +70,7 @@ rpm2archive -n %{SOURCE0} | tar -xf - -C payload
 
 %install
 install -Dm755 payload/usr/bin/artcraft-launcher %{buildroot}%{_bindir}/artcraft-launcher
+install -Dm755 payload/usr/bin/craft-ai-mcp %{buildroot}%{_bindir}/craft-ai-mcp
 install -Dm644 payload/usr/share/applications/ai.storyteller.artcraft-launcher.desktop %{buildroot}%{_datadir}/applications/ai.storyteller.artcraft-launcher.desktop
 install -Dm644 payload/usr/share/doc/artcraft-launcher/ATTRIBUTION.md %{buildroot}%{_docdir}/artcraft-launcher/ATTRIBUTION.md
 install -Dm644 payload/usr/share/doc/artcraft-launcher/LICENSE-APACHE %{buildroot}%{_licensedir}/artcraft-launcher/LICENSE-APACHE
@@ -117,12 +119,16 @@ fi
 %doc %{_docdir}/artcraft-launcher/ATTRIBUTION.md
 %doc %{_docdir}/artcraft-launcher/README.md
 %{_bindir}/artcraft-launcher
+%{_bindir}/craft-ai-mcp
 %{_datadir}/applications/ai.storyteller.artcraft-launcher.desktop
 %{_datadir}/icons/hicolor/*/apps/ai.storyteller.artcraft-launcher.png
 %{_datadir}/icons/hicolor/*/apps/ai.storyteller.artcraft-launcher.svg
 %{_datadir}/metainfo/ai.storyteller.artcraft-launcher.metainfo.xml
 
 %changelog
+* Thu Nov 26 2026 github-actions[bot] <github-actions[bot]@users.noreply.github.com> - 0.20.3-1
+- update to 0.20.3
+
 * Thu Nov 12 2026 github-actions[bot] <github-actions[bot]@users.noreply.github.com> - 0.19.2-1
 - update to 0.19.2
 
