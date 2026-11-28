@@ -12,7 +12,7 @@
 %global __provides_exclude ^(libavcodec|libavformat|libavutil|libswscale)[.]so[.].*$
 
 Name:           orca-slicer
-Version:        2.5.2
+Version:        2.5.3
 Release:        1%{?dist}
 Summary:        Advanced 3D printing slicer with improved compatibility
 License:        AGPL-3.0-only
@@ -151,6 +151,9 @@ fi
 %{_datadir}/mime/packages/com.orcaslicer.OrcaSlicer.xml
 
 %changelog
+* Sat Nov 28 2026 github-actions[bot] <github-actions[bot]@users.noreply.github.com> - 2.5.3-1
+- update to 2.5.3
+
 * Sun Nov 22 2026 github-actions[bot] <github-actions[bot]@users.noreply.github.com> - 2.5.2-1
 - update to 2.5.2
 
