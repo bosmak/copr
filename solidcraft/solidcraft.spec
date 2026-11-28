@@ -5,7 +5,7 @@
 %global __strip /bin/true
 
 Name:           solidcraft
-Version:        0.50.0
+Version:        0.51.2
 Release:        1%{?dist}
 Summary:        Open-source parametric 3D CAD application
 License:        MIT OR Apache-2.0
@@ -80,6 +80,7 @@ rpm2archive -n %{SOURCE0} | tar -xf - -C payload
 install -Dm755 payload/usr/bin/solidcraft %{buildroot}%{_bindir}/solidcraft
 install -Dm755 payload/usr/bin/solidcraft-cli %{buildroot}%{_bindir}/solidcraft-cli
 install -Dm644 payload/usr/share/applications/io.tangencylabs.solidcraft.desktop %{buildroot}%{_datadir}/applications/io.tangencylabs.solidcraft.desktop
+install -Dm644 payload/usr/share/applications/io.tangencylabs.solidcraft.workshop-links.desktop %{buildroot}%{_datadir}/applications/io.tangencylabs.solidcraft.workshop-links.desktop
 install -Dm644 payload/usr/share/doc/solidcraft/LICENSE-APACHE %{buildroot}%{_licensedir}/solidcraft/LICENSE-APACHE
 install -Dm644 payload/usr/share/doc/solidcraft/LICENSE-MIT %{buildroot}%{_licensedir}/solidcraft/LICENSE-MIT
 install -Dm644 payload/usr/share/doc/solidcraft/NOTICE %{buildroot}%{_licensedir}/solidcraft/NOTICE
@@ -129,11 +130,15 @@ fi
 %{_bindir}/solidcraft
 %{_bindir}/solidcraft-cli
 %{_datadir}/applications/io.tangencylabs.solidcraft.desktop
+%{_datadir}/applications/io.tangencylabs.solidcraft.workshop-links.desktop
 %{_datadir}/icons/hicolor/*/apps/io.tangencylabs.solidcraft.png
 %{_datadir}/metainfo/io.tangencylabs.solidcraft.metainfo.xml
 %{_datadir}/mime/packages/io.tangencylabs.solidcraft.xml
 
 %changelog
+* Sat Nov 28 2026 github-actions[bot] <github-actions[bot]@users.noreply.github.com> - 0.51.2-1
+- update to 0.51.2
+
 * Thu Nov 26 2026 github-actions[bot] <github-actions[bot]@users.noreply.github.com> - 0.50.0-1
 - update to 0.50.0
 
